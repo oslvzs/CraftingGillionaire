@@ -1,0 +1,417 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftingGillionaire.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="CraftingGillionaire.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/gil.ico"
+        Title="Crafting Gillionaire">
+
+	<Window.Styles>
+
+		<Style Selector="Button.hyperlink">
+			<Setter Property="Template">
+				<ControlTemplate>
+					<TextBlock Text="{TemplateBinding Content}"
+							   Foreground="{StaticResource SystemAccentColor}"
+							   TextDecorations="Underline">
+						<TextBlock.Styles>
+							<Style Selector="TextBlock:pointerover">
+								<Setter Property="Foreground"
+										Value="{StaticResource SystemAccentColorLight1}"/>
+							</Style>
+						</TextBlock.Styles>
+					</TextBlock>
+				</ControlTemplate>
+			</Setter>
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="BorderThickness" Value="0"/>
+		</Style>
+	</Window.Styles>
+
+	<Design.DataContext>
+		<vm:MainWindowViewModel/>
+	</Design.DataContext>
+	<SplitView DisplayMode="Inline"
+			   IsPaneOpen="{Binding IsSplitViewPaneOpen}"
+			   OpenPaneLength="150">
+		<SplitView.Pane>
+			<Grid Background="DarkGoldenrod"
+				  Margin="5"
+				  RowDefinitions="22, 50, 50, 50, 50, 50, 50, 50, 50, *, 25">
+				<Label Grid.Row="0"
+					   HorizontalAlignment="Center"
+					   FontWeight="Bold">Character level</Label>
+				<StackPanel Grid.Row="1" Margin="5">
+					<TextBlock>Carpenter:</TextBlock>
+					<TextBox x:Name="CarpenterTextBox" Text="{Binding UserInfo.CarpenterLevelString}" />
+				</StackPanel>
+				<StackPanel Grid.Row="2" Margin="5">
+					<TextBlock>Blacksmith:</TextBlock>
+					<TextBox Text="{Binding UserInfo.BlacksmithLevelString}" GotFocus="" />
+				</StackPanel>
+				<StackPanel Grid.Row="3" Margin="5" >
+					<TextBlock>Armorer:</TextBlock>
+					<TextBox Text="{Binding UserInfo.ArmorerLevelString}" />
+				</StackPanel>
+				<StackPanel Grid.Row="4" Margin="5">
+					<TextBlock>Goldsmith:</TextBlock>
+					<TextBox Text="{Binding UserInfo.GoldsmithLevelString}" />
+				</StackPanel>
+				<StackPanel Grid.Row="5" Margin="5">
+					<TextBlock>Leatherworker:</TextBlock>
+					<TextBox Text="{Binding UserInfo.LeatherworkerLevelString}" />
+				</StackPanel>
+				<StackPanel Grid.Row="6" Margin="5">
+					<TextBlock>Weaver:</TextBlock>
+					<TextBox Text="{Binding UserInfo.WeaverLevelString}" />
+				</StackPanel>
+				<StackPanel Grid.Row="7" Margin="5">
+					<TextBlock>Alchemist:</TextBlock>
+					<TextBox Text="{Binding UserInfo.AlchemistLevelString}" />
+				</StackPanel>
+				<StackPanel Grid.Row="8" Margin="5">
+					<TextBlock>Culinarian:</TextBlock>
+					<TextBox Text="{Binding UserInfo.CulinarianLevelString}" />
+				</StackPanel>
+				<Button Grid.Row="10"
+						HorizontalAlignment="Center"
+						Width="70"
+						Command="{Binding OnSaveClick}"
+						HorizontalContentAlignment="Center"
+						Margin="10"
+						Height="30">Save</Button>
+			</Grid>
+		</SplitView.Pane>
+		
+		<Grid RowDefinitions="40, *, 50">
+			<Grid Background="Tan"
+				  Grid.Row="0"
+				  ColumnDefinitions="100, *, 100">
+				<Label Grid.Column="1"
+					   FontSize="20"
+					   FontWeight="Bold"
+					   VerticalAlignment="Center"
+					   HorizontalAlignment="Center">Crafting Gillionaire</Label>
+				<Label Grid.Column="0"
+					   FontSize="10"
+					   VerticalAlignment="Bottom"
+					   HorizontalAlignment="Left"
+					   >Version: Beta 1</Label>
+				<Label Grid.Column="2"
+					   FontSize="10"
+					   VerticalAlignment="Bottom"
+					   HorizontalAlignment="Right"
+					   >Made by Nenew</Label>
+			</Grid>
+			<Grid Grid.Row="1"
+				  IsVisible="{Binding IsCraftingAnalyzerVisible}"
+				  RowDefinitions="65, *">
+				<Grid Background="Gray"
+						Grid.Row="0"
+						ColumnDefinitions="80, *, 80">
+					<Button Grid.Column="0"
+							Command="{Binding OnCraftingAnalyzerBackClick}"
+							HorizontalAlignment="Center"
+							VerticalAlignment="Center"
+							Content="Back"/>
+					<Label Grid.Column="1"
+						   FontWeight="DemiBold"
+						   FontSize="20"
+						   HorizontalAlignment="Center"
+						   VerticalAlignment="Center">Crafting analyzer</Label>
+				</Grid>
+				<Label Grid.Row="1"
+					   IsVisible="{Binding IsCraftingAnalyzerPreparingLabelVisible}"
+					   HorizontalAlignment="Center"
+					   VerticalAlignment="Center"
+					   FontSize="32">Analyzing receipt, please wait...</Label>
+				<Grid Grid.Row="1"
+					  IsVisible="{Binding IsCraftingAnalyzerContentVisible}"
+					  RowDefinitions="120,*">
+					<Grid Grid.Row="0" 
+						  ColumnDefinitions="*,*">
+						<StackPanel Grid.Column="0" >
+							<TextBlock FontSize="20"
+									   FontWeight="Bold">
+								<Run Text="Server:"/>
+								<Run Text="{Binding CraftingAnalyzerItem.ServerName}" />
+							</TextBlock>
+							<Button Classes="hyperlink"
+									FontSize="20"
+									FontWeight="Bold"
+									Content="{Binding CraftingAnalyzerItem.ItemInfo.ItemName}"
+									Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnItemLinkClick}"
+									CommandParameter="{Binding CraftingAnalyzerItem.ItemInfo.ItemID}" />
+							<TextBlock FontSize="20"
+										FontWeight="Bold"
+										IsVisible="{Binding CraftingAnalyzerItem.CraftingJobInfo, Converter={x:Static ObjectConverters.IsNotNull}}" >
+								<Run Text="{Binding CraftingAnalyzerItem.CraftingJobInfo.JobName}" />
+								<Run Text="( lv" />
+								<Run Text="{Binding CraftingAnalyzerItem.CraftingJobInfo.JobLevel}" />
+								<Run Text=")" />
+							</TextBlock>
+							<TextBlock FontSize="20"
+								FontWeight="Bold"
+								Foreground="Red"
+								IsVisible="{Binding !CraftingAnalyzerItem.ItemInfo.CanCraftItem}" >
+								<Run Text="Your level is too low to craft this item!" />
+							</TextBlock>
+						</StackPanel>
+						<StackPanel IsVisible="{Binding CraftingAnalyzerItem.IsItemCraftable}" Grid.Column="1" >
+							<TextBlock FontSize="13"
+									   FontWeight="SemiBold">
+								<Run Text="Crafting costs:"/>
+								<Run Text="{Binding CraftingAnalyzerItem.ItemCraftingProfitInfo.CraftingCosts}" />
+							</TextBlock>
+							<TextBlock IsVisible="{Binding !CraftingAnalyzerItem.ItemCraftingProfitInfo.IsOutOfStock}"
+								FontSize="13"
+									   FontWeight="SemiBold">
+								<Run Text="Minimal price on the marketboard:"/>
+								<Run Text="{Binding CraftingAnalyzerItem.ItemCraftingProfitInfo.MinimalPriceOnMarketboard}" />
+							</TextBlock>
+							<TextBlock IsVisible="{Binding !CraftingAnalyzerItem.ItemCraftingProfitInfo.IsOutOfStock}"
+								FontSize="13"
+									   FontWeight="SemiBold">
+								<Run Text="Income per unit:"/>
+								<Run Text="{Binding CraftingAnalyzerItem.ItemCraftingProfitInfo.IncomePerUnit}" />
+							</TextBlock>
+							<TextBlock IsVisible="{Binding !CraftingAnalyzerItem.ItemCraftingProfitInfo.IsOutOfStock}"
+								FontSize="13"
+										FontWeight="SemiBold">
+								<Run Text="Profit per unit:"/>
+								<Run Text="{Binding CraftingAnalyzerItem.ItemCraftingProfitInfo.ProfitPerUnit}" />
+							</TextBlock>
+							<TextBlock IsVisible="{Binding !CraftingAnalyzerItem.ItemCraftingProfitInfo.IsOutOfStock}"
+								FontSize="13"
+										FontWeight="SemiBold">
+								<Run Text="Quantity sold:"/>
+								<Run Text="{Binding CraftingAnalyzerItem.ItemCraftingProfitInfo.QuantitySold}" />
+							</TextBlock>
+							<TextBlock IsVisible="{Binding !CraftingAnalyzerItem.ItemCraftingProfitInfo.IsOutOfStock}"
+								FontSize="13"
+										 FontWeight="SemiBold">
+								<Run Text="Total profit:"/>
+								<Run Text="{Binding CraftingAnalyzerItem.ItemCraftingProfitInfo.TotalProfit}" />
+							</TextBlock>
+							<TextBlock IsVisible="{Binding CraftingAnalyzerItem.ItemCraftingProfitInfo.IsOutOfStock}"
+									   FontSize="20"
+									   FontWeight="Bold"
+									   Foreground="Yellow"
+									   Text="This item is out of stock!"></TextBlock>
+						</StackPanel>
+					</Grid>
+					<Label Grid.Row="1" 
+						   IsVisible="{Binding !CraftingAnalyzerItem.IsItemCraftable}" 
+						   HorizontalAlignment="Center" 
+							VerticalAlignment="Center" 
+							FontSize="20" 
+							FontWeight="Bold">This item is uncraftable!</Label>
+					<TreeView Grid.Row="1"
+							  ItemsSource="{Binding CraftingAnalyzerItem.CraftingParts}">
+						<TreeView.ItemTemplate>
+							<TreeDataTemplate ItemsSource="{Binding CraftingInfo.CraftingParts}">
+								<StackPanel>
+									<Button Classes="hyperlink"
+											Content="{Binding ItemInfo.ItemName}"
+											FontSize="13"
+											FontWeight="Bold"
+											Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnItemLinkClick}"
+											CommandParameter="{Binding ItemInfo.ItemID}" />
+									<TextBlock FontSize="14">
+										<Run Text="{Binding CraftingInfo.CraftingAmount}" />
+										<Run Text="×" />
+										<Run Text="{Binding CraftingInfo.CraftingCostsPerUnit}" />
+										<Run Text="gil =" />
+										<Run Text="{Binding CraftingInfo.CraftingTotalCosts}" />
+										<Run Text="gil" />
+									</TextBlock>
+									<TextBlock FontSize="13"
+										IsVisible="{Binding CraftingInfo.CraftingJobInfo, Converter={x:Static ObjectConverters.IsNotNull}}" >
+										<Run Text="{Binding CraftingInfo.CraftingJobInfo.JobName}" />
+										<Run Text="( lv" />
+										<Run Text="{Binding CraftingInfo.CraftingJobInfo.JobLevel}" />
+										<Run Text=")" />
+									</TextBlock>
+									<TextBlock IsVisible="{Binding MarketboardInfo.IsMarketboardCostsLess}}"
+											   TextWrapping="WrapWithOverflow"
+											   FontSize="12">
+										<Run Text="There are" />
+										<Run FontWeight="Bold" 
+											 Text="{Binding MarketboardInfo.MarketboardCheaperAmount}" />
+										<Run Text="units on the market board that you can buy for" />
+										<Run FontWeight="Bold" 
+											 Text="{Binding MarketboardInfo.MarketboardCheaperPrice}" />
+										<Run Text="or less gil per unit. It's cheaper!" />
+									</TextBlock>
+									<TextBlock IsVisible="{Binding MarketboardInfo.IsVendorCostsLess}}"
+												TextWrapping="WrapWithOverflow"
+												FontSize="12">
+										<Run Text="Buy this item from vendor. It's cheaper!" />
+									</TextBlock>
+									<TextBlock IsVisible="{Binding !ItemInfo.CanCraftItem}}"
+											   TextWrapping="WrapWithOverflow"
+											   FontSize="12" 
+											   Foreground="Red">
+										<Run FontWeight="Bold" 
+											 Text="Your level is too low to craft this item! You can only buy it from the market board." />
+									</TextBlock>
+								</StackPanel>
+							</TreeDataTemplate>
+						</TreeView.ItemTemplate>
+					</TreeView>
+				</Grid>
+			</Grid>
+
+			<Grid Grid.Row="1"
+				  IsVisible="{Binding IsSaddlebagGridVisible}"
+				  RowDefinitions="75, *">
+				<Grid Grid.Row="0"
+					  ColumnDefinitions="*,*,*,*,*"
+					  Background="Gray">
+					<StackPanel Grid.Column="0"
+							Margin="5"
+							VerticalAlignment="Center">
+						<TextBlock>Server name:</TextBlock>
+						<TextBox Text="{Binding SearchRequestData.ServerName}" />
+					</StackPanel>
+					<StackPanel Grid.Column="1"
+							Margin="5"
+							VerticalAlignment="Center">
+						<TextBlock>Time period (in hours):</TextBlock>
+						<TextBox Text="{Binding SearchRequestData.TimePeriodString}" />
+					</StackPanel>
+
+					<StackPanel Grid.Column="2"
+							Margin="5"
+							VerticalAlignment="Center">
+						<TextBlock>Sales amount:</TextBlock>
+						<TextBox Text="{Binding SearchRequestData.SalesAmountString}" />
+					</StackPanel>
+
+					<StackPanel Grid.Column="3"
+							Margin="5"
+							VerticalAlignment="Center">
+						<TextBlock>Average price:</TextBlock>
+						<TextBox Text="{Binding SearchRequestData.AveragePriceString}" />
+					</StackPanel>
+					<StackPanel Grid.Column="4"
+							Margin="5"
+							VerticalAlignment="Center">
+						<TextBlock>Filters:</TextBlock>
+						<Button Content="Select filters" Command="{Binding OnFiltersButtonClick}" ></Button>
+						<TextBlock>
+							<Run FontSize="12" Text="{Binding SaddlebagSelectedFilterItemsCount}"></Run>
+							<Run FontSize="12" Text="filters picked"></Run>
+						</TextBlock>
+					</StackPanel>
+				</Grid>
+				<Grid Grid.Row="1" ColumnDefinitions="*, 5*, *" RowDefinitions="40, *, 40" IsVisible="{Binding IsFilterPanelVisible}">
+					<Label Grid.Column="1" Grid.Row="0" Content="Select filters:" HorizontalAlignment="Center" VerticalAlignment="Center"></Label>
+					<ListBox Grid.Column="1" Grid.Row="1" SelectionMode="Multiple, Toggle" ItemsSource="{Binding SaddlebagFilterItems}" SelectedItems="{Binding SaddlebagSelectedFilterItems}">
+					</ListBox>
+					<Button Grid.Column="1" Grid.Row="2" Content="Done" HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding OnFiltersPanelOkClick}"></Button>
+				</Grid>
+				<Label Grid.Row="1"
+					   IsVisible="{Binding IsStartSearchLabelVisible}"
+					   HorizontalAlignment="Center"
+					   VerticalAlignment="Center"
+					   FontSize="32">Start search!</Label>
+				<Label Grid.Row="1"
+					   IsVisible="{Binding IsLoadingSearchResultPanelVisible}"
+					   HorizontalAlignment="Center"
+					   VerticalAlignment="Center"
+					   FontSize="32">Searching info, please wait...</Label>
+				<TextBlock Grid.Row="1" 
+					IsVisible="{Binding IsSaddlebagException}"
+					HorizontalAlignment="Center" 
+					VerticalAlignment="Center" 
+					FontSize="32" Text="{Binding SaddlebagException}" TextWrapping="WrapWithOverflow"></TextBlock>
+				<DataGrid Grid.Row="1"
+						  Name="SaddlebagTable"
+						  IsVisible="{Binding IsSearchDataGridVisible}"
+						  HorizontalAlignment="Center"
+						  ItemsSource="{Binding MarketshareInfos}"
+						  CanUserReorderColumns="True"
+						  CanUserResizeColumns="True"
+						  IsReadOnly="True">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Item name"
+											Binding="{Binding ItemName}"
+											Width="2*" />
+						<DataGridTextColumn Header="Min price"
+											Binding="{Binding MinPrice}"
+											Width="1*" />
+						<DataGridTextColumn Header="Average price"
+											Binding="{Binding AveragePrice}"
+											Width="1*" />
+						<DataGridTextColumn Header="Percent change"
+											Binding="{Binding PercentChange}"
+											Width="1*" />
+						<DataGridTextColumn Header="Quantity sold"
+											Binding="{Binding QuantitySold}"
+											Width="1*" />
+						<DataGridTextColumn Header="Sales amount"
+											Binding="{Binding SalesAmount}"
+											Width="1*" />
+						<DataGridTextColumn Header="State"
+											Binding="{Binding State}"
+											Width="1*" />
+
+						<DataGridTemplateColumn
+							Header="Universalis"
+							Width="1*" >
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button VerticalAlignment="Center"
+											HorizontalAlignment="Center"
+											Classes="hyperlink"
+											Content="Open Link"
+											Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnLinkClick}"
+											CommandParameter="{Binding URL}"
+											/>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+
+						<DataGridTemplateColumn
+							Header="Tool"
+							Width="1*" >
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button
+										HorizontalAlignment="Center"
+										HorizontalContentAlignment="Center"
+										Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnAnalyzeClick}"
+										CommandParameter="{Binding .}"
+										Content="Analyze" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+
+					</DataGrid.Columns>
+				</DataGrid>
+			</Grid>
+			<Grid Grid.Row="2"
+				  ColumnDefinitions="50, *, 100"
+				  Background="Gray">
+				<Button Grid.Column="0"
+						Width="80"
+						Command="{Binding OnSettingsClick}"
+						HorizontalContentAlignment="Center"
+						Height="30"
+						Margin="10">Settings</Button>
+				<Button Grid.Column="2"
+						Width="70"
+						IsVisible="{Binding IsSearchButtonVisible}"
+						Command="{Binding OnSearchClick}"
+						HorizontalContentAlignment="Center"
+						Height="30"
+						Margin="10">Search</Button>
+			</Grid>
+		</Grid>
+	</SplitView>
+
+</Window>

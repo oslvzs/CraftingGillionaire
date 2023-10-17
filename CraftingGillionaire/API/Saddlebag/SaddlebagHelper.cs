@@ -3,9 +3,7 @@ using System.Text.Json;
 using System.Text;
 using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Linq;
 using CraftingGillionaire.API.Saddlebag.API;
 using CraftingGillionaire.Models;
 
@@ -56,11 +54,18 @@ namespace CraftingGillionaire.API.Saddlebag
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             string requestString = JsonSerializer.Serialize(request, JsonSerializerOptions.Default);
             var content = new StringContent(requestString, Encoding.UTF8, "application/json");
-            HttpResponseMessage responseObject = await httpClient.PostAsync("http://api.saddlebagexchange.com/api/ffxivmarketshare/", content);
-            string responseBody = await responseObject.Content.ReadAsStringAsync();
-            MarketshareResponse response = JsonSerializer.Deserialize<MarketshareResponse>(responseBody) ?? new MarketshareResponse();
-            
-            return new MarketshareResponseData(response.Data, response.Exception);
+            try
+            {
+                HttpResponseMessage responseObject = await httpClient.PostAsync("http://api.saddlebagexchange.com/api/ffxivmarketshare/", content);
+                string responseBody = await responseObject.Content.ReadAsStringAsync();
+                MarketshareResponse response = JsonSerializer.Deserialize<MarketshareResponse>(responseBody) ?? new MarketshareResponse();
+
+                return new MarketshareResponseData(response.Data, response.Exception);
+            }
+            catch (HttpRequestException ex)
+            {
+                return new MarketshareResponseData(new MarketshareResonseItem[] { }, $"Could not get response from SaddlebagExchange. Try again later!");
+            }
         }
     }
 }

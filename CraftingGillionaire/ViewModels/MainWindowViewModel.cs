@@ -16,7 +16,6 @@ using System.Linq;
 using System;
 using CraftingGillionaire.API.GarlandTools;
 using CraftingGillionaire.Models.CraftingAnalyzer;
-using Avalonia.Controls.Selection;
 using System.IO;
 using System.Text.Json;
 
@@ -31,10 +30,9 @@ namespace CraftingGillionaire.ViewModels
 				ServerName = "Moogle",
 				SalesAmount = 30,
 				AveragePrice = 10000,
-				TimePeriod = 168
+				TimePeriod = 168,
 			};
 			this.UserInfo = new UserInfo(this);
-			this.SaddlebagSelection = new SelectionModel<string>();
 
 			if (File.Exists("user.json"))
 			{
@@ -75,102 +73,6 @@ namespace CraftingGillionaire.ViewModels
 		public string SaddlebagException { get; private set; } = String.Empty;
 
 		public bool IsFilterPanelVisible { get; private set; } = false;
-
-		public List<string> SaddlebagFilterItems { get; private set; } = new List<string>()
-		{
-			"Everything",
-			"Purchasable from NPC Vendor",
-			"Furniture Purchasable from NPC Vendor",
-			"Supply and Provisioning Mission Quest Items",
-			"Crafter Class Quest Items",
-			"Exclude Crafted Gear",
-			"Arms",
-			"-- Archanist's Arms",
-			"-- Archer's Arms",
-			"-- Astrologian's Arms",
-			"-- Blue Mage's Arms",
-			"-- Conjurer's Arms",
-			"-- Dancer's Arms",
-			"-- Dark Knight's Arms",
-			"-- Gunbreaker's Arms",
-			"-- Lancer's Arms",
-			"-- Machinist's Arms",
-			"-- Marauder's Arms",
-			"-- Pugilist's Arms",
-			"-- Red Mage's Arms",
-			"-- Rogue's Arms",
-			"-- Reaper's Arms",
-			"-- Samurai's Arms",
-			"-- Scholar's Arms",
-			"-- Sage's Arms",
-			"-- Thaumaturge's Arms",
-			"Tools",
-			"-- Alchemist's Tools",
-			"-- Armorer's Tools",
-			"-- Blacksmith's Tools",
-			"-- Botanist's Tools",
-			"-- Carpenter's Tools",
-			"-- Culinarian's Tools",
-			"-- Fisher's Tackle",
-			"-- Fisher's Tools",
-			"-- Goldsmith's Tools",
-			"-- Leatherworker's Tools",
-			"-- Miner's Tools",
-			"-- Weaver's Tools",
-			"Armor",
-			"-- Shields",
-			"-- Head",
-			"-- Body",
-			"-- Legs",
-			"-- Hands",
-			"-- Feet",
-			"Accessories",
-			"-- Necklaces",
-			"-- Earrings",
-			"-- Bracelets",
-			"-- Rings",
-			"Medicines & Meals",
-			"-- Medicine",
-			"-- Ingredients",
-			"-- Meals",
-			"-- Seafood",
-			"Materials",
-			"-- Stone",
-			"-- Metal",
-			"-- Lumber",
-			"-- Cloth",
-			"-- Leather",
-			"-- Bone",
-			"-- Reagents",
-			"-- Dyes",
-			"-- Weapon Parts",
-			"Other",
-			"-- Furnishings",
-			"-- Materia",
-			"-- Crystals",
-			"-- Catalysts",
-			"-- Miscellany",
-			"-- Exterior Fixtures",
-			"-- Interior Fixtures",
-			"-- Outdoor Furnishings",
-			"-- Chairs and Beds",
-			"-- Tables",
-			"-- Tabletop",
-			"-- Wall-mounted",
-			"-- Rugs",
-			"-- Seasonal Miscellany",
-			"-- Minions",
-			"-- Airship/Submersible Components",
-			"-- Orchestration Components",
-			"-- Gardening Items",
-			"-- Paintings",
-			"-- Registrable Miscellany"
-		};
-
-		public SelectionModel<string> SaddlebagSelection { get; }
-		public ObservableCollection<string> SaddlebagSelectedFilterItems { get; } = new ObservableCollection<string>();
-
-		public int SaddlebagSelectedFilterItemsCount { get; private set; } = 0;
 
 		public void OnSaveClick()
 		{
@@ -487,9 +389,8 @@ namespace CraftingGillionaire.ViewModels
 			this.IsFilterPanelVisible = false;
 			this.RaisePropertyChanged(nameof(IsFilterPanelVisible));
 
-			this.SaddlebagSelectedFilterItemsCount = this.SaddlebagSelectedFilterItems.Count;
-			this.RaisePropertyChanged(nameof(SaddlebagSelectedFilterItemsCount));
-
+			this.SearchRequestData.OnFiltersPanelOkClick();
+			this.RaisePropertyChanged(nameof(this.SearchRequestData));
 			this.IsStartSearchLabelVisible = true;
 			this.RaisePropertyChanged(nameof(IsStartSearchLabelVisible));
 		}
@@ -514,7 +415,7 @@ namespace CraftingGillionaire.ViewModels
 		private int[] ConvertFiltersToIDs()
 		{
 			List<int> result = new List<int>();
-			foreach(string selectedFilter in this.SaddlebagSelectedFilterItems)
+			foreach(string selectedFilter in this.SearchRequestData.SelectedFilterItems)
 			{
 				int filterID = CommonInfoHelper.ConvertFilterNameToID(selectedFilter);
 				result.Add(filterID);

@@ -1,19 +1,28 @@
-﻿using DynamicData;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace CraftingGillionaire.Models.CraftingAnalyzer
 {
     public class CraftingAnalyzerItem
     {
+        public CraftingAnalyzerItem() { }
+
         public CraftingAnalyzerItem(string serverName, CraftingItemInfo itemInfo, List<CraftingPart> craftingParts, ItemCraftingProfitInfo itemCraftingProfitInfo, CraftingJobInfo craftingJobInfo, bool isItemCraftable)
         {
-            ServerName = serverName;
-            ItemInfo = itemInfo;
-            CraftingParts = craftingParts;
-            ItemCraftingProfitInfo = itemCraftingProfitInfo;
-            CraftingJobInfo = craftingJobInfo;
-            IsItemCraftable = isItemCraftable;
+            this.ServerName = serverName;
+            this.ItemInfo = itemInfo;
+            this.CraftingParts = craftingParts;
+            this.ItemCraftingProfitInfo = itemCraftingProfitInfo;
+            this.CraftingJobInfo = craftingJobInfo;
+            this.IsItemCraftable = isItemCraftable;
+            this.HasException = false;
+            this.Exception = String.Empty;
+        }
+
+        public CraftingAnalyzerItem(string exception)
+        {
+            this.HasException = true;
+            this.Exception = exception;
         }
 
         public string ServerName { get; set; }
@@ -27,5 +36,9 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
         public CraftingJobInfo CraftingJobInfo { get; set; }
 
         public bool IsItemCraftable { get; set; }
+
+        public bool HasException { get; set; }
+
+        public string Exception { get; set; }
     }
 }

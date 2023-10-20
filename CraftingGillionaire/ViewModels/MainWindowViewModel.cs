@@ -33,6 +33,7 @@ namespace CraftingGillionaire.ViewModels
 				TimePeriod = 168,
 			};
 			this.UserInfo = new UserInfo(this);
+			this.CraftingAnalyzerItem = new CraftingAnalyzerItem();
 
 			if (File.Exists("user.json"))
 			{
@@ -47,17 +48,12 @@ namespace CraftingGillionaire.ViewModels
 				this.UserInfo.BlacksmithLevel = savedUserInfo.BlacksmithLevel;
 				this.UserInfo.LeatherworkerLevel = savedUserInfo.LeatherworkerLevel;
 				this.UserInfo.WeaverLevel = savedUserInfo.WeaverLevel;
-			}
-
-			
+			}		
 		}
 
 		public ObservableCollection<MarketshareInfo> MarketshareInfos { get; private set; }
-
 		public SearchRequestData SearchRequestData { get; private set; }
-
 		public UserInfo UserInfo { get; private set; }
-
 		public CraftingAnalyzerItem CraftingAnalyzerItem { get; set; }
 
 		public bool IsSplitViewPaneOpen { get; private set; } = true;
@@ -69,9 +65,10 @@ namespace CraftingGillionaire.ViewModels
 		public bool IsCraftingAnalyzerVisible {  get; private set; } = false;
 		public bool IsCraftingAnalyzerPreparingLabelVisible { get; private set; } = false;
 		public bool IsCraftingAnalyzerContentVisible { get; private set; } = false;
-		public bool IsSaddlebagException { get; private set; } = false;
+		public bool HasGarlandToolsException { get; private set; }
+		public string GarlandToosException { get; private set; }
+		public bool HasSaddlebagException { get; private set; } = false;
 		public string SaddlebagException { get; private set; } = String.Empty;
-
 		public bool IsFilterPanelVisible { get; private set; } = false;
 
 		public void OnSaveClick()
@@ -80,13 +77,13 @@ namespace CraftingGillionaire.ViewModels
 			string fileName = "user.json";
 			File.WriteAllText(fileName, text);
 			this.IsSplitViewPaneOpen = false;
-			this.RaisePropertyChanged(nameof(IsSplitViewPaneOpen));
+			this.RaisePropertyChanged(nameof(this.IsSplitViewPaneOpen));
 		}
 
 		public void OnSettingsClick()
 		{
 			this.IsSplitViewPaneOpen = !this.IsSplitViewPaneOpen;
-			this.RaisePropertyChanged(nameof(IsSplitViewPaneOpen));
+			this.RaisePropertyChanged(nameof(this.IsSplitViewPaneOpen));
 		}
 
 		public async void OnSearchClick()
@@ -94,31 +91,31 @@ namespace CraftingGillionaire.ViewModels
 			this.IsSearchDataGridVisible = false;
 			this.IsStartSearchLabelVisible = false;
 			this.IsLoadingSearchResultPanelVisible = true;
-			this.IsSaddlebagException = false;
+			this.HasSaddlebagException = false;
 			this.IsFilterPanelVisible = false;
-			this.RaisePropertyChanged(nameof(IsFilterPanelVisible));
-			this.RaisePropertyChanged(nameof(IsSearchDataGridVisible));
-			this.RaisePropertyChanged(nameof(IsStartSearchLabelVisible));
-			this.RaisePropertyChanged(nameof(IsLoadingSearchResultPanelVisible));
-			this.RaisePropertyChanged(nameof(IsSaddlebagException));
+			this.RaisePropertyChanged(nameof(this.IsFilterPanelVisible));
+			this.RaisePropertyChanged(nameof(this.IsSearchDataGridVisible));
+			this.RaisePropertyChanged(nameof(this.IsStartSearchLabelVisible));
+			this.RaisePropertyChanged(nameof(this.IsLoadingSearchResultPanelVisible));
+			this.RaisePropertyChanged(nameof(this.HasSaddlebagException));
 
 			ObservableCollection<MarketshareInfo> marketshareInfoList = await this.GetMarketshareInfo();
 			this.MarketshareInfos.Clear();
 			this.MarketshareInfos.AddRange(marketshareInfoList);
-			this.RaisePropertyChanged(nameof(MarketshareInfos));
+			this.RaisePropertyChanged(nameof(this.MarketshareInfos));
 
 			this.IsLoadingSearchResultPanelVisible = false;
-			this.RaisePropertyChanged(nameof(IsLoadingSearchResultPanelVisible));
+			this.RaisePropertyChanged(nameof(this.IsLoadingSearchResultPanelVisible));
 
-			if (!this.IsSaddlebagException)
+			if (!this.HasSaddlebagException)
 			{
 				this.IsSearchDataGridVisible = true;
-				this.RaisePropertyChanged(nameof(IsSearchDataGridVisible));			
+				this.RaisePropertyChanged(nameof(this.IsSearchDataGridVisible));			
 			}
 			else
 			{
-				this.RaisePropertyChanged(nameof(SaddlebagException));
-				this.RaisePropertyChanged(nameof(IsSaddlebagException));
+				this.RaisePropertyChanged(nameof(this.SaddlebagException));
+				this.RaisePropertyChanged(nameof(this.HasSaddlebagException));
 			}
 
 		}
@@ -131,7 +128,7 @@ namespace CraftingGillionaire.ViewModels
 			MarketshareResponseData responseData = await SaddlebagHelper.GetMarketshareResonseItemsAsync(request);
 			if (!String.IsNullOrEmpty(responseData.Exception))
 			{
-				this.IsSaddlebagException = true;
+				this.HasSaddlebagException = true;
 				this.SaddlebagException = responseData.Exception;
 				return new ObservableCollection<MarketshareInfo>();
 			}
@@ -166,21 +163,35 @@ namespace CraftingGillionaire.ViewModels
 			this.IsCraftingAnalyzerVisible = true;
 			this.IsCraftingAnalyzerPreparingLabelVisible = true;
 			this.IsCraftingAnalyzerContentVisible = false;
+			this.HasGarlandToolsException = false;
+			this.RaisePropertyChanged(nameof(this.IsSaddlebagGridVisible));
+			this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerVisible));
+			this.RaisePropertyChanged(nameof(this.IsSearchButtonVisible));
+			this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerPreparingLabelVisible));
+			this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerContentVisible));
+			this.RaisePropertyChanged(nameof(this.HasGarlandToolsException));
 
-			this.RaisePropertyChanged(nameof(IsSaddlebagGridVisible));
-			this.RaisePropertyChanged(nameof(IsCraftingAnalyzerVisible));
-			this.RaisePropertyChanged(nameof(IsSearchButtonVisible));
-			this.RaisePropertyChanged(nameof(IsCraftingAnalyzerPreparingLabelVisible));
-			this.RaisePropertyChanged(nameof(IsCraftingAnalyzerContentVisible));
+			ItemInfoResult itemInfoResult = await GarlandToolsHelper.GetItemResponse(marketshareInfo.ItemID);
+			if (itemInfoResult.HasException)
+			{
+				this.HasGarlandToolsException = true;
+				this.GarlandToosException = itemInfoResult.Exception;
+                this.IsCraftingAnalyzerPreparingLabelVisible = false;
+                this.RaisePropertyChanged(nameof(this.HasGarlandToolsException));
+				this.RaisePropertyChanged(nameof(this.GarlandToosException));
+                this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerPreparingLabelVisible));
+            }
+			else
+			{
+				CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo);
+				this.CraftingAnalyzerItem = await craftingAnalyzerItemBuilder.PrepareInfo(itemInfoResult.ItemResponse, this.SearchRequestData.ServerName, marketshareInfo.QuantitySold);
+				this.IsCraftingAnalyzerPreparingLabelVisible = false;
+				this.IsCraftingAnalyzerContentVisible = true;
 
-			ItemResponse response = await GarlandToolsHelper.GetItemResponse(marketshareInfo.ItemID);
-			this.CraftingAnalyzerItem = await this.PrepareInfo(response, this.SearchRequestData.ServerName, marketshareInfo.QuantitySold);
-			this.IsCraftingAnalyzerPreparingLabelVisible = false;
-			this.IsCraftingAnalyzerContentVisible = true;
-
-			this.RaisePropertyChanged(nameof(IsCraftingAnalyzerPreparingLabelVisible));
-			this.RaisePropertyChanged(nameof(IsCraftingAnalyzerContentVisible));
-			this.RaisePropertyChanged(nameof(CraftingAnalyzerItem));
+				this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerPreparingLabelVisible));
+				this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerContentVisible));
+				this.RaisePropertyChanged(nameof(this.CraftingAnalyzerItem));
+			}
 		}
 
 		public void OnCraftingAnalyzerBackClick()
@@ -189,177 +200,14 @@ namespace CraftingGillionaire.ViewModels
 			this.IsSearchButtonVisible = true;
 			this.IsCraftingAnalyzerVisible = false;
 
-			this.RaisePropertyChanged(nameof(IsSaddlebagGridVisible));
-			this.RaisePropertyChanged(nameof(IsCraftingAnalyzerVisible));
-			this.RaisePropertyChanged(nameof(IsSearchButtonVisible));
+			this.RaisePropertyChanged(nameof(this.IsSaddlebagGridVisible));
+			this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerVisible));
+			this.RaisePropertyChanged(nameof(this.IsSearchButtonVisible));
 		}
 
 		public void OnLinkClick(string url)
 		{
 			this.OpenLink(url);
-		}
-
-		private async Task<CraftingAnalyzerItem> PrepareInfo(ItemResponse response, string serverName, int quantitySold)
-		{
-			int itemID = response.ItemInfo.ID;
-			string itemName = response.ItemInfo.Name;
-			CraftingItemInfo craftingItemInfo = null;
-			ItemCraftingProfitInfo profitInfo = null;
-			CraftingJobInfo craftingJobInfo = null;
-			bool isItemCraftable = true;
-			List<CraftingPart> craftingParts = new List<CraftingPart>();
-			if (response.ItemInfo.CraftsList != null && response.ItemInfo.CraftsList.Count > 0)
-			{
-				CraftInfo craftInfo = response.ItemInfo.CraftsList.First();
-				string jobName = String.Empty;
-				int jobLevel = craftInfo.JobLevel;
-				int jobID = craftInfo.JobID;
-				if (jobID > 0)
-					jobName = CommonInfoHelper.GetJobNameByID(jobID);
-
-				bool canCraftItem = this.CanCraftItem(jobID, jobLevel);
-
-
-				foreach (RecipePart recipePart in craftInfo.RecipePartsList)
-				{
-					CraftingPart craftingPart = await this.GetCraftingPart(serverName, response.IngredientsList, recipePart);
-					craftingParts.Add(craftingPart);
-				}
-
-				int recipeCosts;
-				if (craftingParts.Count > 0)
-				{
-					recipeCosts = craftingParts.Sum(x => x.CraftingInfo.CraftingTotalCosts);
-				}
-				else
-				{
-					string datacenterName = CommonInfoHelper.GetDatacenterByServerName(serverName);
-					recipeCosts = await ApplicationCache.GetItemMinPriceByDatacenter(itemID, datacenterName);
-				}
-				int itemMarketboardMinPrice = await UniversalisHelper.GetItemMinPrice(itemID, serverName);
-
-				craftingItemInfo = new CraftingItemInfo(itemID, itemName, canCraftItem);
-				profitInfo = new ItemCraftingProfitInfo(recipeCosts, itemMarketboardMinPrice, quantitySold);
-				craftingJobInfo = new CraftingJobInfo(jobName, jobLevel);
-			}
-			else
-			{
-				craftingItemInfo = new CraftingItemInfo(itemID, itemName, true);
-				isItemCraftable = false;
-			}
-
-            CraftingAnalyzerItem itemCraftingInfo = new CraftingAnalyzerItem(serverName, craftingItemInfo, craftingParts, profitInfo, craftingJobInfo, isItemCraftable);
-			return itemCraftingInfo;
-		}
-
-
-		private async Task<CraftingPart> GetCraftingPart(string serverName, List<IngredientInfo> allIngredientsInfo, RecipePart recipePart)
-		{
-			int recipePartItemID = recipePart.ID;
-			int recipePartAmount = recipePart.Amount;
-			string recipePartItemName;
-			List<CraftingPart> recipePartCrafringParts = new List<CraftingPart>();
-			IngredientInfo ingredientInfo = allIngredientsInfo.FirstOrDefault(x => x.ID == recipePartItemID);
-			int jobID = 0;
-			int jobLevel = 0;
-			string jobName = String.Empty;
-			CraftingJobInfo craftingJobInfo = null;
-			bool canCraftItem = true;
-			int vendorPrice = 0;
-			if (ingredientInfo != null)
-			{
-				recipePartItemName = ingredientInfo.Name;
-				if (ingredientInfo.CraftsList != null && ingredientInfo.CraftsList.Count > 0)
-				{
-					CraftInfo craftInfo = ingredientInfo.CraftsList[0];
-
-					jobID = craftInfo.JobID;
-					if (jobID > 0)
-						jobName = CommonInfoHelper.GetJobNameByID(jobID);
-					jobLevel = craftInfo.JobLevel;
-					craftingJobInfo = new CraftingJobInfo(jobName, jobLevel);
-					canCraftItem = this.CanCraftItem(jobID, jobLevel);
-					foreach (RecipePart innerRecipePart in craftInfo.RecipePartsList)
-					{
-						CraftingPart innerCraftingPart = await this.GetCraftingPart(serverName, allIngredientsInfo, innerRecipePart);
-						recipePartCrafringParts.Add(innerCraftingPart);
-					}
-				}
-
-				if (ingredientInfo.Vendors != null && ingredientInfo.Vendors.Count > 0 && ingredientInfo.Price > 0)
-				{
-					vendorPrice = ingredientInfo.Price;
-				}
-			}
-			else
-			{
-				recipePartItemName = await ApplicationCache.GetItemName(recipePartItemID);
-			}
-
-			int recipePartCostPerUnit;
-			int marketboardCheaperPrice = 0;
-			int marketboardCheaperAmount = 0;
-			string datacenterName = CommonInfoHelper.GetDatacenterByServerName(serverName);
-			if (recipePartCrafringParts.Count > 0)
-			{
-				recipePartCostPerUnit = recipePartCrafringParts.Sum(x => x.CraftingInfo.CraftingTotalCosts);
-				List<MarketListing> marketListings = await UniversalisHelper.GetItemListings(recipePartItemID, datacenterName);
-				List<MarketListing> cheaperListings = marketListings.Where(x => x.PricePerUnit <= recipePartCostPerUnit).ToList();
-				if (cheaperListings.Count > 0)
-				{
-					marketboardCheaperPrice = cheaperListings.Last().PricePerUnit;
-					marketboardCheaperAmount = cheaperListings.Sum(x => x.Quantity);
-				}
-			}
-			else
-			{
-				recipePartCostPerUnit = await ApplicationCache.GetItemMinPriceByDatacenter(recipePartItemID, datacenterName);
-			}
-
-			bool isMarketBoardCostsLess = false;
-			bool isVendorCostsLess = false;
-
-			if (marketboardCheaperPrice > 0)
-			{
-				if (vendorPrice < marketboardCheaperPrice)
-				{
-					if (vendorPrice > 0 && vendorPrice <= recipePartCostPerUnit)
-					{
-						recipePartCostPerUnit = vendorPrice;
-						isVendorCostsLess = true;
-					}
-				}
-				else
-				{
-					if (marketboardCheaperPrice <= recipePartCostPerUnit)
-					{
-						recipePartCostPerUnit = marketboardCheaperPrice;
-						isMarketBoardCostsLess = true;
-					}
-				}
-			}
-			else
-			{
-				if (vendorPrice > 0 && vendorPrice <= recipePartCostPerUnit)
-				{
-					recipePartCostPerUnit = vendorPrice;
-					isVendorCostsLess = true;
-				}
-			}
-
-			CraftingItemInfo craftingItemInfo = new CraftingItemInfo(recipePartItemID, recipePartItemName, canCraftItem);			
-			CraftingInfo craftingInfo = new CraftingInfo(recipePartAmount, recipePartCostPerUnit, recipePartCrafringParts, craftingJobInfo);
-			MarketboardInfo marketboardInfo = new MarketboardInfo(isMarketBoardCostsLess, isVendorCostsLess, marketboardCheaperPrice, marketboardCheaperAmount, vendorPrice);
-			return new CraftingPart(craftingItemInfo, craftingInfo, marketboardInfo);
-		}
-
-		private bool CanCraftItem(int jobID, int minJobLevel)
-		{
-			if (jobID == 0)
-				return false;
-
-			int currentUserJobLevel = this.UserInfo.GetLevelByJobID(jobID);
-			return currentUserJobLevel >= minJobLevel;
 		}
 
 		public void OnItemLinkClick(int itemID)
@@ -371,28 +219,28 @@ namespace CraftingGillionaire.ViewModels
 		public void OnFiltersButtonClick()
 		{
 			this.IsFilterPanelVisible = true;
-			this.RaisePropertyChanged(nameof(IsFilterPanelVisible));
+			this.RaisePropertyChanged(nameof(this.IsFilterPanelVisible));
 
 			this.IsSearchDataGridVisible = false;
 			this.IsStartSearchLabelVisible = false;
 			this.IsLoadingSearchResultPanelVisible = false;
-			this.IsSaddlebagException = false;
+			this.HasSaddlebagException = false;
 
-			this.RaisePropertyChanged(nameof(IsSearchDataGridVisible));
-			this.RaisePropertyChanged(nameof(IsStartSearchLabelVisible));
-			this.RaisePropertyChanged(nameof(IsLoadingSearchResultPanelVisible));
-			this.RaisePropertyChanged(nameof(IsSaddlebagException));
+			this.RaisePropertyChanged(nameof(this.IsSearchDataGridVisible));
+			this.RaisePropertyChanged(nameof(this.IsStartSearchLabelVisible));
+			this.RaisePropertyChanged(nameof(this.IsLoadingSearchResultPanelVisible));
+			this.RaisePropertyChanged(nameof(this.HasSaddlebagException));
 		}
 
 		public void OnFiltersPanelOkClick()
 		{
 			this.IsFilterPanelVisible = false;
-			this.RaisePropertyChanged(nameof(IsFilterPanelVisible));
+			this.RaisePropertyChanged(nameof(this.IsFilterPanelVisible));
 
 			this.SearchRequestData.OnFiltersPanelOkClick();
 			this.RaisePropertyChanged(nameof(this.SearchRequestData));
 			this.IsStartSearchLabelVisible = true;
-			this.RaisePropertyChanged(nameof(IsStartSearchLabelVisible));
+			this.RaisePropertyChanged(nameof(this.IsStartSearchLabelVisible));
 		}
 
 		private void OpenLink(string url)
@@ -415,12 +263,9 @@ namespace CraftingGillionaire.ViewModels
 		private int[] ConvertFiltersToIDs()
 		{
 			List<int> result = new List<int>();
-			foreach(string selectedFilter in this.SearchRequestData.SelectedFilterItems)
-			{
-				int filterID = CommonInfoHelper.ConvertFilterNameToID(selectedFilter);
-				result.Add(filterID);
-			}
-
+			foreach(MarketshareFilterItem selectedFilter in this.SearchRequestData.SelectedFilterItems)
+				result.Add(selectedFilter.ID);
+			
 			return result.ToArray();
 		}
 	}

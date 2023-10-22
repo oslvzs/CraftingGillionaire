@@ -7,7 +7,7 @@
 		xmlns:models="using:CraftingGillionaire.Models"
 		xmlns:usermodel="using:CraftingGillionaire.Models.User"
 		xmlns:analyzer="using:CraftingGillionaire.Models.CraftingAnalyzer"
-		xmlns:scg="using:System.Collections.ObjectModel"
+    xmlns:scg="using:System.Collections.ObjectModel"
 		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="CraftingGillionaire.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -93,7 +93,7 @@
 
     <DataTemplate  DataType="models:SearchRequestData">
       <Grid
-	  ColumnDefinitions="*,*,*,*,*"
+	  ColumnDefinitions="*,*,*,*,*, *"
 	  Background="Gray">
         <StackPanel Grid.Column="0"
 						Margin="5"
@@ -131,10 +131,19 @@
             <Run FontSize="12" Text="filters picked"></Run>
           </TextBlock>
         </StackPanel>
+        <StackPanel Grid.Column="5"
+    Margin="5"
+    VerticalAlignment="Center">
+          <TextBlock>Data filter mode:</TextBlock>
+          <Button Content="Select filter mode" Command="{Binding OnRowsFilterButtonClick}" ></Button>
+          <TextBlock>
+            <Run FontSize="12" Text="{Binding RowsSelectedFilterItem.Name}"></Run>
+          </TextBlock>
+        </StackPanel>
       </Grid>
     </DataTemplate>
 
-    <DataTemplate DataType="analyzer:CraftingAnalyzerItem">
+    <DataTemplate DataType="analyzer:CraftingTreeRootNode">
       <Grid RowDefinitions="*">
         <TextBlock Grid.Row="0" 
                IsVisible="{Binding HasException}" 
@@ -164,56 +173,56 @@
                   CommandParameter="{Binding ItemInfo.ItemID}" />
               <TextBlock FontSize="20"
                     FontWeight="Bold"
-                    IsVisible="{Binding CraftingJobInfo, Converter={x:Static ObjectConverters.IsNotNull}}" >
-                <Run Text="{Binding CraftingJobInfo.JobName}" />
+                    IsVisible="{Binding JobInfo, Converter={x:Static ObjectConverters.IsNotNull}}" >
+                <Run Text="{Binding JobInfo.JobName}" />
                 <Run Text="( lv" />
-                <Run Text="{Binding CraftingJobInfo.JobLevel}" />
+                <Run Text="{Binding JobInfo.JobLevel}" />
                 <Run Text=")" />
               </TextBlock>
               <TextBlock FontSize="20"
                 FontWeight="Bold"
                 Foreground="Red"
-                IsVisible="{Binding !ItemInfo.CanCraftItem}" >
+                IsVisible="{Binding ShowLowLevelText}" >
                 <Run Text="Your level is too low to craft this item!" />
               </TextBlock>
             </StackPanel>
-            <StackPanel IsVisible="{Binding IsItemCraftable}" Grid.Column="1" >
+            <StackPanel IsVisible="{Binding ItemInfo.IsCraftable}" Grid.Column="1" >
               <TextBlock FontSize="13"
                      FontWeight="SemiBold">
                 <Run Text="Crafting costs:"/>
-                <Run Text="{Binding ItemCraftingProfitInfo.CraftingCosts}" />
+                <Run Text="{Binding ProfitInfo.CraftingCosts}" />
               </TextBlock>
-              <TextBlock IsVisible="{Binding !ItemCraftingProfitInfo.IsOutOfStock}"
+              <TextBlock IsVisible="{Binding !ProfitInfo.IsOutOfStock}"
                      FontSize="13"
                      FontWeight="SemiBold">
                 <Run Text="Minimal price on the marketboard:"/>
-                <Run Text="{Binding ItemCraftingProfitInfo.MinimalPriceOnMarketboard}" />
+                <Run Text="{Binding ProfitInfo.MinimalPriceOnMarketboard}" />
               </TextBlock>
-              <TextBlock IsVisible="{Binding !ItemCraftingProfitInfo.IsOutOfStock}"
+              <TextBlock IsVisible="{Binding !ProfitInfo.IsOutOfStock}"
                      FontSize="13"
                      FontWeight="SemiBold">
                 <Run Text="Income per unit:"/>
-                <Run Text="{Binding ItemCraftingProfitInfo.IncomePerUnit}" />
+                <Run Text="{Binding ProfitInfo.IncomePerUnit}" />
               </TextBlock>
-              <TextBlock IsVisible="{Binding !ItemCraftingProfitInfo.IsOutOfStock}"
+              <TextBlock IsVisible="{Binding !ProfitInfo.IsOutOfStock}"
                      FontSize="13"
                      FontWeight="SemiBold">
                 <Run Text="Profit per unit:"/>
-                <Run Text="{Binding ItemCraftingProfitInfo.ProfitPerUnit}" />
+                <Run Text="{Binding ProfitInfo.ProfitPerUnit}" />
               </TextBlock>
-              <TextBlock IsVisible="{Binding !ItemCraftingProfitInfo.IsOutOfStock}"
+              <TextBlock IsVisible="{Binding !ProfitInfo.IsOutOfStock}"
                      FontSize="13"
                      FontWeight="SemiBold">
                 <Run Text="Quantity sold:"/>
-                <Run Text="{Binding ItemCraftingProfitInfo.QuantitySold}" />
+                <Run Text="{Binding ProfitInfo.QuantitySold}" />
               </TextBlock>
-              <TextBlock IsVisible="{Binding !ItemCraftingProfitInfo.IsOutOfStock}"
+              <TextBlock IsVisible="{Binding !ProfitInfo.IsOutOfStock}"
                      FontSize="13"
                      FontWeight="SemiBold">
                 <Run Text="Total profit:"/>
-                <Run Text="{Binding ItemCraftingProfitInfo.TotalProfit}" />
+                <Run Text="{Binding ProfitInfo.TotalProfit}" />
               </TextBlock>
-              <TextBlock IsVisible="{Binding ItemCraftingProfitInfo.IsOutOfStock}"
+              <TextBlock IsVisible="{Binding ProfitInfo.IsOutOfStock}"
                      FontSize="20"
                      FontWeight="Bold"
                      Foreground="Yellow"
@@ -221,15 +230,15 @@
             </StackPanel>
           </Grid>
           <Label Grid.Row="1"
-               IsVisible="{Binding !IsItemCraftable}"
+               IsVisible="{Binding !ItemInfo.IsCraftable}"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
                FontSize="20"
                FontWeight="Bold">This item is uncraftable!</Label>
           <TreeView Grid.Row="1"
-                ItemsSource="{Binding CraftingParts}">
+                ItemsSource="{Binding ChildrenNodes}">
             <TreeView.ItemTemplate>
-              <TreeDataTemplate ItemsSource="{Binding CraftingInfo.CraftingParts}">
+              <TreeDataTemplate ItemsSource="{Binding ChildrenNodes}">
                 <StackPanel>
                   <Button Classes="hyperlink"
                       Content="{Binding ItemInfo.ItemName}"
@@ -238,40 +247,42 @@
                       Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnItemLinkClick}"
                       CommandParameter="{Binding ItemInfo.ItemID}" />
                   <TextBlock FontSize="14">
-                    <Run Text="{Binding CraftingInfo.CraftingAmount}" />
+                    <Run Text="{Binding Amount}" />
                     <Run Text="×" />
-                    <Run Text="{Binding CraftingInfo.CraftingCostsPerUnit}" />
+                    <Run Text="{Binding CostsInfo.MinCosts}" />
                     <Run Text="gil =" />
-                    <Run Text="{Binding CraftingInfo.CraftingTotalCosts}" />
+                    <Run Text="{Binding CostsInfo.TotalCosts}" />
                     <Run Text="gil" />
                   </TextBlock>
                   <TextBlock FontSize="13"
-                    IsVisible="{Binding CraftingInfo.CraftingJobInfo, Converter={x:Static ObjectConverters.IsNotNull}}" >
-                    <Run Text="{Binding CraftingInfo.CraftingJobInfo.JobName}" />
+                    IsVisible="{Binding JobInfo, Converter={x:Static ObjectConverters.IsNotNull}}" >
+                    <Run Text="{Binding JobInfo.JobName}" />
                     <Run Text="( lv" />
-                    <Run Text="{Binding CraftingInfo.CraftingJobInfo.JobLevel}" />
+                    <Run Text="{Binding JobInfo.JobLevel}" />
                     <Run Text=")" />
                   </TextBlock>
-                  <TextBlock IsVisible="{Binding MarketboardInfo.IsMarketboardCostsLess}}"
+                  <TextBlock IsVisible="{Binding ShowCheaperMarketpoard}"
                          TextWrapping="WrapWithOverflow"
                          FontSize="12">
                     <Run Text="There are" />
                     <Run FontWeight="Bold"
-                       Text="{Binding MarketboardInfo.MarketboardCheaperAmount}" />
+                       Text="{Binding CostsInfo.MarketboardCheaperAmount}" />
                     <Run Text="units on the market board that you can buy for" />
                     <Run FontWeight="Bold"
-                       Text="{Binding MarketboardInfo.MarketboardCheaperPrice}" />
+                       Text="{Binding CostsInfo.MarketboardCosts}" />
                     <Run Text="or less gil per unit. It's cheaper!" />
                   </TextBlock>
-                  <TextBlock IsVisible="{Binding MarketboardInfo.IsVendorCostsLess}}"
+                  <TextBlock IsVisible="{Binding CostsInfo.IsVendorCheaper}}"
                          TextWrapping="WrapWithOverflow"
                          FontSize="12">
                     <Run Text="Buy this item from vendor. It's cheaper!" />
                   </TextBlock>
-                  <TextBlock IsVisible="{Binding !ItemInfo.CanCraftItem}}"
+                  <TextBlock
                          TextWrapping="WrapWithOverflow"
                          FontSize="12"
-                         Foreground="Red">
+                         Foreground="Red"
+                         IsVisible="{Binding ShowLowLevelText, Mode=OneWay}">
+                    
                     <Run FontWeight="Bold"
                        Text="Your level is too low to craft this item! You can only buy it from the market board." />
                   </TextBlock>
@@ -458,10 +469,37 @@
           </ListBox>
           <Button Grid.Column="1"
 							Grid.Row="2"
-							Content="Done"
+							Content="Apply"
 							HorizontalAlignment="Center"
 							VerticalAlignment="Center"
 							Command="{Binding OnFiltersPanelOkClick}" />
+        </Grid>
+            <Grid Grid.Row="1"
+					  ColumnDefinitions="*, 5*, *"
+					  RowDefinitions="40, *, 40"
+					  IsVisible="{Binding IsRowsFilterPanelVisible}">
+          <Label Grid.Column="1"
+						   Grid.Row="0"
+						   HorizontalAlignment="Center"
+						   VerticalAlignment="Center"
+						   >Select rows filter:</Label>
+          <ListBox Grid.Column="1"
+							 Grid.Row="1"
+							 SelectionMode="Single, Toggle"
+							 ItemsSource="{Binding SearchRequestData.RowsFilterItems}"
+					         SelectedItem="{Binding SearchRequestData.RowsSelectedFilterItem}">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Name}"></TextBlock>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+          <Button Grid.Column="1"
+							Grid.Row="2"
+							Content="Done"
+							HorizontalAlignment="Center"
+							VerticalAlignment="Center"
+							Command="{Binding OnRowsFiltersPanelOkClick}" />
         </Grid>
         <Label Grid.Row="1"
 					   IsVisible="{Binding IsStartSearchLabelVisible}"

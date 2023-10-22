@@ -1,4 +1,6 @@
-﻿namespace CraftingGillionaire.Models
+﻿using CraftingGillionaire.Models.CraftingAnalyzer;
+
+namespace CraftingGillionaire.Models
 {
 	public class MarketshareInfo
 	{
@@ -21,5 +23,7 @@
 		public string State { get; set; }
 
 		public string URL { get; set; }
+
+		public CraftingTreeRootNode TreeRootNode { get; set; }
 	}
 }

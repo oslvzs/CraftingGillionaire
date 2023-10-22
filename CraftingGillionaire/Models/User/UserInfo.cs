@@ -11,21 +11,21 @@ namespace CraftingGillionaire.Models.User
         public UserInfo(MainWindowViewModel mainWindowViewModel)
         {
             this._mainWindowViewModel = mainWindowViewModel ?? throw new ArgumentNullException(nameof(mainWindowViewModel));
-			this.CarpenterLevel = 1;
-			this.ArmorerLevel = 1;
-			this.BlacksmithLevel = 1;
-			this.GoldsmithLevel = 1;
-			this.LeatherworkerLevel = 1;
-			this.WeaverLevel = 1;
-			this.AlchemistLevel = 1;
-			this.CulinarianLevel = 1;
+			this.CarpenterLevel = 0;
+			this.ArmorerLevel = 0;
+			this.BlacksmithLevel = 0;
+			this.GoldsmithLevel = 0;
+			this.LeatherworkerLevel = 0;
+			this.WeaverLevel = 0;
+			this.AlchemistLevel = 0;
+			this.CulinarianLevel = 0;
         }
 
 		public UserInfo() { }
 
 		private readonly MainWindowViewModel _mainWindowViewModel;
 
-		public int CarpenterLevel { get; set; } = 1;
+		public int CarpenterLevel { get; set; } = 0;
 
 		[JsonIgnore]
         public string CarpenterLevelString
@@ -33,7 +33,7 @@ namespace CraftingGillionaire.Models.User
             get => this.CarpenterLevel.ToString();
             set
             {
-				if (Int32.TryParse(value, out int carpenterLevel) && carpenterLevel > 0 && carpenterLevel <= 90)
+				if (Int32.TryParse(value, out int carpenterLevel) && carpenterLevel >= 0 && carpenterLevel <= 90)
 				{
 					this.CarpenterLevel = carpenterLevel;
 					this._mainWindowViewModel.RaisePropertyChanged(nameof(CarpenterLevelString));
@@ -41,7 +41,7 @@ namespace CraftingGillionaire.Models.User
 			}
         }
 
-		public int BlacksmithLevel { get; set; } = 1;
+		public int BlacksmithLevel { get; set; } = 0;
 
 		[JsonIgnore]
 		public string BlacksmithLevelString
@@ -67,7 +67,7 @@ namespace CraftingGillionaire.Models.User
 
 				if (!String.IsNullOrEmpty(valueString))
 				{
-					if (Int32.TryParse(valueString, out int blacksmithLevel) && blacksmithLevel > 0 && blacksmithLevel <= 90)
+					if (Int32.TryParse(valueString, out int blacksmithLevel) && blacksmithLevel >= 0 && blacksmithLevel <= 90)
 					{
 						this.BlacksmithLevel = blacksmithLevel;
 						this._mainWindowViewModel.RaisePropertyChanged(nameof(BlacksmithLevelString));
@@ -76,7 +76,7 @@ namespace CraftingGillionaire.Models.User
 			}
 		}
 
-		public int ArmorerLevel { get; set; } = 1;
+		public int ArmorerLevel { get; set; } = 0;
 
 		[JsonIgnore]
 		public string ArmorerLevelString
@@ -84,7 +84,7 @@ namespace CraftingGillionaire.Models.User
 			get => this.ArmorerLevel.ToString();
 			set
 			{
-				if (Int32.TryParse(value, out int armorerLevel) && armorerLevel > 0 && armorerLevel <= 90)
+				if (Int32.TryParse(value, out int armorerLevel) && armorerLevel >= 0 && armorerLevel <= 90)
 				{
 					this.ArmorerLevel = armorerLevel;
 					this._mainWindowViewModel.RaisePropertyChanged(nameof(ArmorerLevelString));
@@ -92,7 +92,7 @@ namespace CraftingGillionaire.Models.User
 			}
 		}
 
-		public int GoldsmithLevel { get; set; } = 1;
+		public int GoldsmithLevel { get; set; } = 0;
 
 		[JsonIgnore]
 		public string GoldsmithLevelString
@@ -100,7 +100,7 @@ namespace CraftingGillionaire.Models.User
 			get => this.GoldsmithLevel.ToString();
 			set
 			{
-				if (Int32.TryParse(value, out int goldsmithLevel) && goldsmithLevel > 0 && goldsmithLevel <= 90)
+				if (Int32.TryParse(value, out int goldsmithLevel) && goldsmithLevel >= 0 && goldsmithLevel <= 90)
 				{
 					this.GoldsmithLevel = goldsmithLevel;
 					this._mainWindowViewModel.RaisePropertyChanged(nameof(GoldsmithLevelString));
@@ -108,7 +108,7 @@ namespace CraftingGillionaire.Models.User
 			}
 		}
 
-		public int LeatherworkerLevel { get; set; } = 1;
+		public int LeatherworkerLevel { get; set; } = 0;
 
 		[JsonIgnore]
 		public string LeatherworkerLevelString
@@ -116,7 +116,7 @@ namespace CraftingGillionaire.Models.User
 			get => this.LeatherworkerLevel.ToString();
 			set
 			{
-				if (Int32.TryParse(value, out int leatherworkerLevel) && leatherworkerLevel > 0 && leatherworkerLevel <= 90)
+				if (Int32.TryParse(value, out int leatherworkerLevel) && leatherworkerLevel >= 0 && leatherworkerLevel <= 90)
 				{
 					this.LeatherworkerLevel = leatherworkerLevel;
 					this._mainWindowViewModel.RaisePropertyChanged(nameof(LeatherworkerLevelString));
@@ -124,7 +124,7 @@ namespace CraftingGillionaire.Models.User
 			}
 		}
 
-		public int WeaverLevel { get; set; } = 1;
+		public int WeaverLevel { get; set; } = 0;
 
 		[JsonIgnore]
 		public string WeaverLevelString
@@ -132,7 +132,7 @@ namespace CraftingGillionaire.Models.User
 			get => this.WeaverLevel.ToString();
 			set
 			{
-				if (Int32.TryParse(value, out int weaverLevel) && weaverLevel > 0 && weaverLevel <= 90)
+				if (Int32.TryParse(value, out int weaverLevel) && weaverLevel >= 0 && weaverLevel <= 90)
 				{
 					this.WeaverLevel = weaverLevel;
 					this._mainWindowViewModel.RaisePropertyChanged(nameof(WeaverLevelString));
@@ -140,7 +140,7 @@ namespace CraftingGillionaire.Models.User
 			}
 		}
 
-		public int AlchemistLevel { get; set; } = 1;
+		public int AlchemistLevel { get; set; } = 0;
 
 		[JsonIgnore]
 		public string AlchemistLevelString
@@ -148,7 +148,7 @@ namespace CraftingGillionaire.Models.User
 			get => this.AlchemistLevel.ToString();
 			set
 			{
-				if (Int32.TryParse(value, out int alchemistLevel) && alchemistLevel > 0 && alchemistLevel <= 90)
+				if (Int32.TryParse(value, out int alchemistLevel) && alchemistLevel >= 0 && alchemistLevel <= 90)
 				{
 					this.AlchemistLevel = alchemistLevel;
 					this._mainWindowViewModel.RaisePropertyChanged(nameof(AlchemistLevelString));
@@ -156,7 +156,7 @@ namespace CraftingGillionaire.Models.User
 			}
 		}
 
-		public int CulinarianLevel { get; set; } = 1;
+		public int CulinarianLevel { get; set; } = 0;
 
 		[JsonIgnore]
 		public string CulinarianLevelString
@@ -164,7 +164,7 @@ namespace CraftingGillionaire.Models.User
 			get => this.CulinarianLevel.ToString();
 			set
 			{
-				if (Int32.TryParse(value, out int culinarianLevel) && culinarianLevel > 0 && culinarianLevel <= 90)
+				if (Int32.TryParse(value, out int culinarianLevel) && culinarianLevel >= 0 && culinarianLevel <= 90)
 				{
 					this.CulinarianLevel = culinarianLevel;
 					this._mainWindowViewModel.RaisePropertyChanged(nameof(CulinarianLevelString));

@@ -132,6 +132,15 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
             Dictionary<int, int> minPricesDictionary = multipleMinPricesResult.MinPricesDictionary;
             int recipeCosts;
+
+            MarketMinPriceResult itemMarketboardMinPriceResult = await UniversalisHelper.GetItemMinPrice(rootNode.ItemInfo.ItemID, this.ServerName);
+            if (itemMarketboardMinPriceResult.HasException)
+            {
+                rootNode.HasException = true;
+                rootNode.Exception = itemMarketboardMinPriceResult.Exception;
+                return;
+            }
+
             if (rootNode.ItemInfo.IsCraftable)
             {
                 foreach (CraftingTreeNode treeNode in rootNode.ChildrenNodes)
@@ -141,15 +150,11 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
                 recipeCosts = rootNode.ChildrenNodes.Sum(x => x.CostsInfo.TotalCosts);
             }
-
-            MarketMinPriceResult itemMarketboardMinPriceResult = await UniversalisHelper.GetItemMinPrice(rootNode.ItemInfo.ItemID, this.ServerName);
-            if (itemMarketboardMinPriceResult.HasException)
+            else
             {
-                rootNode.HasException = true;
-                rootNode.Exception = itemMarketboardMinPriceResult.Exception;
-                return;
+                recipeCosts = itemMarketboardMinPriceResult.MinPrice;
             }
-            recipeCosts = itemMarketboardMinPriceResult.MinPrice;
+
             rootNode.ProfitInfo = new CraftingTreeProfitInfo(recipeCosts, itemMarketboardMinPriceResult.MinPrice, quantitySold);
         }
 

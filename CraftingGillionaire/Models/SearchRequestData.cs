@@ -156,8 +156,18 @@ namespace CraftingGillionaire.Models
         };
 
 		public ObservableCollection<MarketshareFilterItem> SelectedFilterItems { get; } = new ObservableCollection<MarketshareFilterItem>();
-		
-		public int SelectedFilterItemsCount { get; set; } = 0;
+        
+        public int SelectedFilterItemsCount { get; set; } = 0;
+
+        public List<RowsFilterItem> RowsFilterItems { get; private set; } = new List<RowsFilterItem>()
+        {
+            new RowsFilterItem("Everything", 0),
+            new RowsFilterItem("Only craftable", 1),
+            new RowsFilterItem("Only craftable by me", 2),
+            new RowsFilterItem("Only fully craftable by me", 3)
+        };
+
+        public RowsFilterItem RowsSelectedFilterItem { get; set; }
 
 		public void OnFiltersButtonClick()
 		{
@@ -169,5 +179,15 @@ namespace CraftingGillionaire.Models
 			this.SelectedFilterItemsCount = this.SelectedFilterItems.Count;
 			this.RaisePropertyChanged(nameof(this.SelectedFilterItemsCount));
 		}
+
+        public void OnRowsFilterButtonClick()
+        {
+            this._mainWindowViewModel.OnRowsFilterButtonClick();
+        }
+
+        public void OnRowsFilterPanelOkClick()
+        {
+            this.RaisePropertyChanged(nameof(this.RowsSelectedFilterItem));
+        }
 	}
 }

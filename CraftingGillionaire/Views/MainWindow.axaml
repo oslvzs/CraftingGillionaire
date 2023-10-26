@@ -396,7 +396,7 @@
 					   FontSize="10"
 					   VerticalAlignment="Bottom"
 					   HorizontalAlignment="Left"
-					   >Version: Beta 1</Label>
+					   >Version: Beta 4</Label>
         <Label Grid.Column="2"
 					   FontSize="10"
 					   VerticalAlignment="Bottom"

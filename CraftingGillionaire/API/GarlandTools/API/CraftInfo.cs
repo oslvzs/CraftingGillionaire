@@ -5,9 +5,6 @@ namespace CraftingGillionaire.API.GarlandTools.API
 {
     public class CraftInfo
     {
-        [JsonPropertyName("id")]
-        public int ID { get; set; }
-
         [JsonPropertyName("job")]
         public int JobID { get; set; }
 

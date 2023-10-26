@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using CraftingGillionaire.API.Saddlebag.API;
 using CraftingGillionaire.Models;
+using CraftingGillionaire.API.GarlandTools;
 
 namespace CraftingGillionaire.API.Saddlebag
 {
@@ -50,7 +51,10 @@ namespace CraftingGillionaire.API.Saddlebag
 
         internal static async Task<MarketshareResponseData> GetMarketshareResonseItemsAsync(MarketshareRequest request)
         {
-            HttpClient httpClient = new HttpClient();
+            HttpClient httpClient = new HttpClient()
+            {
+                Timeout = TimeSpan.FromSeconds(150)
+            };
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             string requestString = JsonSerializer.Serialize(request, JsonSerializerOptions.Default);
             StringContent content = new StringContent(requestString, Encoding.UTF8, "application/json");
@@ -66,6 +70,10 @@ namespace CraftingGillionaire.API.Saddlebag
             catch (HttpRequestException ex)
             {
                 return new MarketshareResponseData(new MarketshareResonseItem[] { }, $"Could not get response from SaddlebagExchange. Try again later!");
+            }
+            catch (JsonException ex)
+            {
+                return new MarketshareResponseData(new MarketshareResonseItem[] { }, $"Could not parse answer from SaddlebagExchange.");
             }
         }
     }

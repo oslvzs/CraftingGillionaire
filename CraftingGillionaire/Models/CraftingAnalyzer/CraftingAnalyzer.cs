@@ -109,6 +109,9 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
         internal async Task FillTreeCosts(CraftingTreeRootNode rootNode, int quantitySold)
         {
+            rootNode.HasException = false;
+            rootNode.Exception = String.Empty;
+
             HashSet<int> itemIDs = new HashSet<int>
             {
                 rootNode.ItemInfo.ItemID

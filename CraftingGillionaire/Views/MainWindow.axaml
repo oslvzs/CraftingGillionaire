@@ -91,9 +91,40 @@
       </Grid>
     </DataTemplate>
 
-    <DataTemplate  DataType="models:SearchRequestData">
+    <DataTemplate  DataType="models:SalesHistorySearchRequestData">
       <Grid
-	  ColumnDefinitions="*,*,*,*,*, *"
+	  ColumnDefinitions="*,*,*,100"
+	  Background="Gray">
+        <StackPanel Grid.Column="0"
+						Margin="5"
+						VerticalAlignment="Center">
+          <TextBlock>Server or Datacenter name:</TextBlock>
+          <TextBox Text="{Binding ServerName}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1"
+          Margin="5"
+          VerticalAlignment="Center">
+          <TextBlock>Item name:</TextBlock>
+          <TextBox Text="{Binding ItemName}" />
+        </StackPanel>
+        <StackPanel Grid.Column="2"
+						Margin="5"
+						VerticalAlignment="Center">
+          <TextBlock>Time period (in hours):</TextBlock>
+          <TextBox Text="{Binding TimePeriodString}" />
+        </StackPanel>
+        <Button Grid.Column="3"
+    Width="70"
+    Command="{Binding MainWindowViewModel.OnSalesHistorySearchClick}"
+    HorizontalContentAlignment="Center"
+    Height="30"
+    Margin="10">Search</Button>
+      </Grid>
+    </DataTemplate>
+
+    <DataTemplate  DataType="models:MarketshareSearchRequestData">
+      <Grid
+	  ColumnDefinitions="*,*,*,*,120,160,100"
 	  Background="Gray">
         <StackPanel Grid.Column="0"
 						Margin="5"
@@ -140,8 +171,16 @@
             <Run FontSize="12" Text="{Binding RowsSelectedFilterItem.Name}"></Run>
           </TextBlock>
         </StackPanel>
+        <Button Grid.Column="6"
+    Width="70"
+    IsVisible="{Binding MainWindowViewModel.IsSearchButtonVisible, Mode=OneWayToSource}"
+    Command="{Binding MainWindowViewModel.OnMarketshareSearchClick}"
+    HorizontalContentAlignment="Center"
+    Height="30"
+    Margin="10">Search</Button>
       </Grid>
     </DataTemplate>
+
 
     <DataTemplate DataType="analyzer:CraftingTreeRootNode">
       <Grid RowDefinitions="*">
@@ -359,6 +398,32 @@
         </DataGrid.Columns>
       </DataGrid>
     </DataTemplate>
+
+    <DataTemplate >
+      <DataTemplate.DataType>
+        <x:Type TypeName="scg:ObservableCollection" x:TypeArguments="models:SaleDisplayItem"/>
+      </DataTemplate.DataType>
+      <DataGrid
+			  ItemsSource="{Binding}"
+			  CanUserReorderColumns="True"
+			  CanUserResizeColumns="True"
+			  IsReadOnly="True">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Buyer name"
+                    Binding="{Binding BuyerName}"
+                    Width="4*" />
+          <DataGridTextColumn Header="Quantity"
+										Binding="{Binding Quantity}"
+										Width="2*" />
+          <DataGridTextColumn Header="Price per unit"
+										Binding="{Binding PricePerUnit}"
+										Width="3*" />
+          <DataGridTextColumn Header="Date"
+										Binding="{Binding Date}"
+										Width="4*" />
+        </DataGrid.Columns>
+      </DataGrid>
+    </DataTemplate>
   </Window.DataTemplates>
   <!-- END DATA TEMPLATES -->
 
@@ -396,133 +461,191 @@
 					   FontSize="10"
 					   VerticalAlignment="Bottom"
 					   HorizontalAlignment="Left"
-					   >Version: Beta 4</Label>
+					   >Version: Beta 5</Label>
         <Label Grid.Column="2"
 					   FontSize="10"
 					   VerticalAlignment="Bottom"
 					   HorizontalAlignment="Right"
 					   >Made by Nenew</Label>
       </Grid>
-      <Grid Grid.Row="1"
-				  IsVisible="{Binding IsCraftingAnalyzerVisible}"
-				  RowDefinitions="65, *">
-        <Grid Background="Gray"
-						Grid.Row="0"
-						ColumnDefinitions="80, *, 80">
-          <Button Grid.Column="0"
-							Command="{Binding OnCraftingAnalyzerBackClick}"
-							HorizontalAlignment="Center"
-							VerticalAlignment="Center"
-							Content="Back"/>
-          <Label Grid.Column="1"
-						   FontWeight="DemiBold"
-						   FontSize="20"
-						   HorizontalAlignment="Center"
-						   VerticalAlignment="Center">Crafting analyzer</Label>
-        </Grid>
-        <Label Grid.Row="1"
-					   IsVisible="{Binding IsCraftingAnalyzerPreparingLabelVisible}"
-					   HorizontalAlignment="Center"
-					   VerticalAlignment="Center"
-					   FontSize="32">Analyzing receipt, please wait...</Label>
-        <TextBlock Grid.Row="1"
-          IsVisible="{Binding HasGarlandToolsException}"
-             HorizontalAlignment="Center"
-					   VerticalAlignment="Center"
-					   FontSize="32"
-             FontWeight="Bold"
-             Foreground="Red"
-             Text="{Binding GarlandToosException}" />        
-        <ContentControl Grid.Row="1"
-								IsVisible="{Binding IsCraftingAnalyzerContentVisible}"
-								Content="{Binding CraftingAnalyzerItem}" />
-      </Grid>
+      <TabControl Grid.Row="1">
+        <TabItem Header="Crafting Analyzer" FontSize="16" FontWeight="Bold">
+          <Panel>
+            <Grid Grid.Row="0"
+              IsVisible="{Binding IsCraftingAnalyzerVisible}"
+              RowDefinitions="65, *">
+              <Grid Background="Gray"
+                  Grid.Row="0"
+                  ColumnDefinitions="80, *, 80">
+                <Button Grid.Column="0"
+                    Command="{Binding OnCraftingAnalyzerBackClick}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Content="Back"/>
+                <Label Grid.Column="1"
+                     FontWeight="DemiBold"
+                     FontSize="20"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center">Crafting analyzer</Label>
+              </Grid>
+              <Label Grid.Row="1"
+                   IsVisible="{Binding IsCraftingAnalyzerPreparingLabelVisible}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="32">Analyzing receipt, please wait...</Label>
+              <TextBlock Grid.Row="1"
+                IsVisible="{Binding HasGarlandToolsException}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="32"
+                   FontWeight="Bold"
+                   Foreground="Red"
+                   Text="{Binding GarlandToosException}" />
+              <ContentControl Grid.Row="1"
+                      IsVisible="{Binding IsCraftingAnalyzerContentVisible}"
+                      Content="{Binding CraftingAnalyzerItem}" />
+            </Grid>
 
-      <Grid Grid.Row="1"
-				  IsVisible="{Binding IsSaddlebagGridVisible}"
-				  RowDefinitions="75, *">
-        <ContentControl Grid.Row="0" Content="{Binding SearchRequestData}" />
-        <ContentControl Content="{Binding MarketshareInfos}"
-								Grid.Row="1"
-								Name="SaddlebagTable"
-								IsVisible="{Binding IsSearchDataGridVisible}"
-								HorizontalAlignment="Center" />
-        <Grid Grid.Row="1"
-					  ColumnDefinitions="*, 5*, *"
-					  RowDefinitions="40, *, 40"
-					  IsVisible="{Binding IsFilterPanelVisible}">
-          <Label Grid.Column="1"
-						   Grid.Row="0"
-						   HorizontalAlignment="Center"
-						   VerticalAlignment="Center"
-						   >Select filters:</Label>
-          <ListBox Grid.Column="1"
-							 Grid.Row="1"
-							 SelectionMode="Multiple, Toggle"
-							 ItemsSource="{Binding SearchRequestData.FilterItems}"
-					         SelectedItems="{Binding SearchRequestData.SelectedFilterItems}">
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding Name}"></TextBlock>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-          <Button Grid.Column="1"
-							Grid.Row="2"
-							Content="Apply"
-							HorizontalAlignment="Center"
-							VerticalAlignment="Center"
-							Command="{Binding OnFiltersPanelOkClick}" />
-        </Grid>
             <Grid Grid.Row="1"
-					  ColumnDefinitions="*, 5*, *"
-					  RowDefinitions="40, *, 40"
-					  IsVisible="{Binding IsRowsFilterPanelVisible}">
-          <Label Grid.Column="1"
-						   Grid.Row="0"
-						   HorizontalAlignment="Center"
-						   VerticalAlignment="Center"
+                IsVisible="{Binding IsSaddlebagGridVisible}"
+                RowDefinitions="75, *">
+              <ContentControl Grid.Row="0" Content="{Binding MarketshareSearchRequestData}" />
+              <ContentControl Content="{Binding MarketshareInfos}"
+                      Grid.Row="1"
+                      Name="SaddlebagTable"
+                      IsVisible="{Binding IsSearchDataGridVisible}"
+                      HorizontalAlignment="Center" />
+              <Grid Grid.Row="1"
+                  ColumnDefinitions="*, 5*, *"
+                  RowDefinitions="40, *, 40"
+                  IsVisible="{Binding IsFilterPanelVisible}">
+                <Label Grid.Column="1"
+                     Grid.Row="0"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+						   >Select filters:</Label>
+                <ListBox Grid.Column="1"
+                     Grid.Row="1"
+                     SelectionMode="Multiple, Toggle"
+                     ItemsSource="{Binding MarketshareSearchRequestData.FilterItems}"
+                         SelectedItems="{Binding MarketshareSearchRequestData.SelectedFilterItems}">
+                  <ListBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Name}"></TextBlock>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+                <Button Grid.Column="1"
+                    Grid.Row="2"
+                    Content="Apply"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Command="{Binding OnFiltersPanelOkClick}" />
+              </Grid>
+              <Grid Grid.Row="1"
+              ColumnDefinitions="*, 5*, *"
+              RowDefinitions="40, *, 40"
+              IsVisible="{Binding IsRowsFilterPanelVisible}">
+                <Label Grid.Column="1"
+                     Grid.Row="0"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
 						   >Select rows filter:</Label>
-          <ListBox Grid.Column="1"
-							 Grid.Row="1"
-							 SelectionMode="Single, Toggle"
-							 ItemsSource="{Binding SearchRequestData.RowsFilterItems}"
-					         SelectedItem="{Binding SearchRequestData.RowsSelectedFilterItem}">
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding Name}"></TextBlock>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-          <Button Grid.Column="1"
-							Grid.Row="2"
-							Content="Done"
-							HorizontalAlignment="Center"
-							VerticalAlignment="Center"
-							Command="{Binding OnRowsFiltersPanelOkClick}" />
-        </Grid>
-        <Label Grid.Row="1"
-					   IsVisible="{Binding IsStartSearchLabelVisible}"
-					   HorizontalAlignment="Center"
-					   VerticalAlignment="Center"
-					   FontSize="32">Start search!</Label>
-        <Label Grid.Row="1"
-					   IsVisible="{Binding IsLoadingSearchResultPanelVisible}"
-					   HorizontalAlignment="Center"
-					   VerticalAlignment="Center"
-					   FontSize="32">Searching info, please wait...</Label>
-        <TextBlock Grid.Row="1"
-						   IsVisible="{Binding HasSaddlebagException}"
-						   HorizontalAlignment="Center"
-						   VerticalAlignment="Center"
-						   FontSize="32"
-               FontWeight="Bold" 
-               Foreground="Red"
-						   Text="{Binding SaddlebagException}"
-			         TextWrapping="WrapWithOverflow" />
-      </Grid>
+                <ListBox Grid.Column="1"
+                     Grid.Row="1"
+                     SelectionMode="Single, Toggle"
+                     ItemsSource="{Binding MarketshareSearchRequestData.RowsFilterItems}"
+                         SelectedItem="{Binding MarketshareSearchRequestData.RowsSelectedFilterItem}">
+                  <ListBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Name}"></TextBlock>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+                <Button Grid.Column="1"
+                    Grid.Row="2"
+                    Content="Done"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Command="{Binding OnRowsFiltersPanelOkClick}" />
+              </Grid>
+              <Label Grid.Row="1"
+                   IsVisible="{Binding IsStartSearchLabelVisible}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontWeight="Bold"
+                   FontSize="32">Start search!</Label>
+              <Label Grid.Row="1"
+                   IsVisible="{Binding IsLoadingSearchResultPanelVisible}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="32">Searching info, please wait...</Label>
+              <TextBlock Grid.Row="1"
+                     IsVisible="{Binding HasSaddlebagException}"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     FontSize="32"
+                     FontWeight="Bold"
+                     Foreground="Red"
+                     Text="{Binding SaddlebagException}"
+                     TextWrapping="WrapWithOverflow" />
+            </Grid>
+          </Panel>
+        </TabItem>
+        <TabItem Header="Sales history" FontSize="16" FontWeight="Bold">
+          <Panel>
+            <Grid RowDefinitions="75,*">
+              <ContentControl Grid.Row="0" Content="{Binding SalesHistoryRequestData}" />
+              <TextBlock Grid.Row="1" IsVisible="{Binding IsStartSearchHistoryLabelVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Text="Start the search!"/>
+              <TextBlock Grid.Row="1" IsVisible="{Binding IsSearchHistoryPreparingPanelVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Text="Searching info, please wait..."/>
+              <TextBlock Grid.Row="1" IsVisible="{Binding HasSalesHistoryException}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Foreground="Red" Text="{Binding SalesHistoryException}"/>
+              <Grid Grid.Row="1" IsVisible="{Binding IsSearchHistoryPanelVisible}" ColumnDefinitions="*, 5, *">
+                <TextBlock Grid.Column="0" IsVisible="{Binding IsNQSalesHistoryEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontWeight="Bold" Text="No NQ sales!"/>
+                <Grid Grid.Column="0" IsVisible="{Binding !IsNQSalesHistoryEmpty}" RowDefinitions="100, *" Margin="5">
+                  <StackPanel Grid.Row="0" Orientation="Vertical">
+                    <TextBlock HorizontalAlignment="Center" FontWeight="Bold" FontSize="20">NQ sales</TextBlock>
+                    <TextBlock>
+                      <Run>Total sales:</Run>
+                      <Run Text="{Binding NQSalesHistoryStats.TotalSells}"></Run>
+                    </TextBlock>
+                    <TextBlock>
+                      <Run>Total units sold:</Run>
+                      <Run Text="{Binding NQSalesHistoryStats.TotalUnitsSold}"></Run>
+                    </TextBlock>
+                    <TextBlock>
+                      <Run>Average price:</Run>
+                      <Run Text="{Binding NQSalesHistoryStats.AveragePrice}"></Run>
+                    </TextBlock>
+                  </StackPanel>
+                  <ContentControl Grid.Row="1" Content="{Binding NQSalesHistory}"></ContentControl> 
+                </Grid>
+                <Panel Grid.Column="1" Background="Gray"></Panel>
+                <TextBlock Grid.Column="2" IsVisible="{Binding IsHQSalesHistoryEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontWeight="Bold" Text="No HQ sales!"/>
+                <Grid Grid.Column="2" IsVisible="{Binding !IsHQSalesHistoryEmpty}" RowDefinitions="100, *" Margin="5">
+                  <StackPanel Grid.Row="0">
+                    <TextBlock HorizontalAlignment="Center" FontWeight="Bold" FontSize="20">HQ sales</TextBlock>
+                    <TextBlock>
+                      <Run>Total sales:</Run>
+                      <Run Text="{Binding HQSalesHistoryStats.TotalSells}"></Run>
+                    </TextBlock>
+                    <TextBlock>
+                      <Run>Total units sold:</Run>
+                      <Run Text="{Binding HQSalesHistoryStats.TotalUnitsSold}"></Run>
+                    </TextBlock>
+                    <TextBlock>
+                      <Run>Average price:</Run>
+                      <Run Text="{Binding HQSalesHistoryStats.AveragePrice}"></Run>
+                    </TextBlock>
+                  </StackPanel>
+                  <ContentControl Grid.Row="1" Content="{Binding HQSalesHistory}"></ContentControl>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Panel>
+        </TabItem>
+      </TabControl>
       <Grid Grid.Row="2"
-				  ColumnDefinitions="50, *, 100"
+				  ColumnDefinitions="50, *"
 				  Background="Gray">
         <Button Grid.Column="0"
 						Width="80"
@@ -530,13 +653,6 @@
 						HorizontalContentAlignment="Center"
 						Height="30"
 						Margin="10">Settings</Button>
-        <Button Grid.Column="2"
-						Width="70"
-						IsVisible="{Binding IsSearchButtonVisible}"
-						Command="{Binding OnSearchClick}"
-						HorizontalContentAlignment="Center"
-						Height="30"
-						Margin="10">Search</Button>
       </Grid>
     </Grid>
   </SplitView>

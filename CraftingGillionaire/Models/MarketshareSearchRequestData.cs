@@ -7,14 +7,14 @@ using System.Collections.ObjectModel;
 
 namespace CraftingGillionaire.Models
 {
-	public class SearchRequestData : ReactiveObject
+	public class MarketshareSearchRequestData : ReactiveObject
 	{
-		public SearchRequestData(MainWindowViewModel mainWindowViewModel)
+		public MarketshareSearchRequestData(MainWindowViewModel mainWindowViewModel)
 		{
-			_mainWindowViewModel = mainWindowViewModel;
+			this.MainWindowViewModel = mainWindowViewModel;
 		}
 
-		private readonly MainWindowViewModel _mainWindowViewModel;
+		public MainWindowViewModel MainWindowViewModel { get; }
 
 		public string ServerName { get; set; }
 
@@ -27,7 +27,7 @@ namespace CraftingGillionaire.Models
 				if (Int32.TryParse(value, out int timePeriod))
 				{
 					this.TimePeriod = timePeriod;
-					this._mainWindowViewModel.RaisePropertyChanged(nameof(TimePeriodString));
+					this.MainWindowViewModel.RaisePropertyChanged(nameof(TimePeriodString));
 				}
 			}
 		}
@@ -42,7 +42,7 @@ namespace CraftingGillionaire.Models
 				if (Int32.TryParse(value, out int salesAmount))
 				{
 					this.SalesAmount = salesAmount;
-					this._mainWindowViewModel.RaisePropertyChanged(nameof(SalesAmountString));
+					this.MainWindowViewModel.RaisePropertyChanged(nameof(SalesAmountString));
 				}
 			}
 		}
@@ -56,7 +56,7 @@ namespace CraftingGillionaire.Models
 				if (Int32.TryParse(value, out int averagePrice))
 				{
 					this.AveragePrice = averagePrice;
-					this._mainWindowViewModel.RaisePropertyChanged(nameof(AveragePriceString));
+					this.MainWindowViewModel.RaisePropertyChanged(nameof(AveragePriceString));
 				}
 			}
 		}
@@ -171,7 +171,7 @@ namespace CraftingGillionaire.Models
 
 		public void OnFiltersButtonClick()
 		{
-			this._mainWindowViewModel.OnFiltersButtonClick();
+			this.MainWindowViewModel.OnFiltersButtonClick();
 		}
 
 		public void OnFiltersPanelOkClick()
@@ -182,7 +182,7 @@ namespace CraftingGillionaire.Models
 
         public void OnRowsFilterButtonClick()
         {
-            this._mainWindowViewModel.OnRowsFilterButtonClick();
+            this.MainWindowViewModel.OnRowsFilterButtonClick();
         }
 
         public void OnRowsFilterPanelOkClick()

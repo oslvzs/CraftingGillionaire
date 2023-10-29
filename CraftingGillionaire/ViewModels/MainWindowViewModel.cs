@@ -14,6 +14,10 @@ using CraftingGillionaire.API.GarlandTools;
 using CraftingGillionaire.Models.CraftingAnalyzer;
 using System.IO;
 using System.Text.Json;
+using CraftingGillionaire.API.XIVAPI;
+using CraftingGillionaire.API.Universalis;
+using System.Linq;
+using CraftingGillionaire.API.Universalis.API;
 
 namespace CraftingGillionaire.ViewModels
 {
@@ -22,13 +26,23 @@ namespace CraftingGillionaire.ViewModels
         public MainWindowViewModel()
         {
             this.MarketshareInfos = new ObservableCollection<MarketshareInfo>();
-            this.SearchRequestData = new SearchRequestData(this)
+            this.MarketshareSearchRequestData = new MarketshareSearchRequestData(this)
             {
                 ServerName = "Moogle",
                 SalesAmount = 30,
                 AveragePrice = 10000,
                 TimePeriod = 168,
             };
+            this.SalesHistoryRequestData = new SalesHistorySearchRequestData(this)
+            {
+                ServerName = "Moogle",
+                ItemName = "White Rectangular Partition",
+                TimePeriod = 168
+            };
+            this.NQSalesHistory = new ObservableCollection<SaleDisplayItem>();
+            this.NQSalesHistoryStats = new SalesHistoryStats(this.NQSalesHistory);
+            this.HQSalesHistory = new ObservableCollection<SaleDisplayItem>();
+            this.HQSalesHistoryStats = new SalesHistoryStats(this.HQSalesHistory);
             this.UserInfo = new UserInfo(this);
             this.CraftingAnalyzerItem = new CraftingTreeRootNode();
 
@@ -49,7 +63,8 @@ namespace CraftingGillionaire.ViewModels
         }
 
         public ObservableCollection<MarketshareInfo> MarketshareInfos { get; private set; }
-        public SearchRequestData SearchRequestData { get; private set; }
+        public MarketshareSearchRequestData MarketshareSearchRequestData { get; private set; }
+        public SalesHistorySearchRequestData SalesHistoryRequestData { get; private set; }
         public UserInfo UserInfo { get; private set; }
         public CraftingTreeRootNode CraftingAnalyzerItem { get; set; }
 
@@ -69,6 +84,20 @@ namespace CraftingGillionaire.ViewModels
         public bool IsFilterPanelVisible { get; private set; } = false;
 
         public bool IsRowsFilterPanelVisible { get; private set; } = false;
+        public bool IsStartSearchHistoryLabelVisible { get; private set; } = true;
+        public bool HasSalesHistoryException { get; private set; } = false;
+        public string SalesHistoryException { get; private set; } = String.Empty;
+        public bool IsSearchHistoryPreparingPanelVisible { get; private set; } = false;
+        public bool IsSearchHistoryPanelVisible { get; private set; } = false;
+
+        public ObservableCollection<SaleDisplayItem> NQSalesHistory { get; private set; }
+        public ObservableCollection<SaleDisplayItem> HQSalesHistory { get; private set; } 
+
+        public SalesHistoryStats NQSalesHistoryStats { get; private set; }
+        public SalesHistoryStats HQSalesHistoryStats { get; private set; }
+
+        public bool IsNQSalesHistoryEmpty { get; private set; } = false;
+        public bool IsHQSalesHistoryEmpty { get; private set; } = false;
 
         public void OnSaveClick()
         {
@@ -85,7 +114,9 @@ namespace CraftingGillionaire.ViewModels
             this.RaisePropertyChanged(nameof(this.IsSplitViewPaneOpen));
         }
 
-        public async void OnSearchClick()
+        #region Marketshare 
+
+        public async void OnMarketshareSearchClick()
         {
             this.IsSearchDataGridVisible = false;
             this.IsStartSearchLabelVisible = false;
@@ -102,9 +133,9 @@ namespace CraftingGillionaire.ViewModels
             this.MarketshareInfos.Clear();
             this.MarketshareInfos.AddRange(marketshareInfoList);
 
-            if (this.SearchRequestData.RowsSelectedFilterItem != null)
+            if (this.MarketshareSearchRequestData.RowsSelectedFilterItem != null)
             {
-                this.MarketshareInfos = this.FilterMarketshareInfo(this.SearchRequestData.RowsSelectedFilterItem.ID);
+                this.MarketshareInfos = this.FilterMarketshareInfo(this.MarketshareSearchRequestData.RowsSelectedFilterItem.ID);
             }
 
             this.RaisePropertyChanged(nameof(this.MarketshareInfos));
@@ -129,7 +160,7 @@ namespace CraftingGillionaire.ViewModels
         {
             ObservableCollection<MarketshareInfo> marketshareInfoList = new ObservableCollection<MarketshareInfo>();
             int[] filters = this.ConvertFiltersToIDs();
-            MarketshareRequest request = SaddlebagHelper.CreateRequestObject(this.SearchRequestData, SortBy.PurchaseAmount, filters);
+            MarketshareRequest request = SaddlebagHelper.CreateRequestObject(this.MarketshareSearchRequestData, SortBy.PurchaseAmount, filters);
             MarketshareResponseData responseData = await SaddlebagHelper.GetMarketshareResonseItemsAsync(request);
             if (!String.IsNullOrEmpty(responseData.Exception))
             {
@@ -139,7 +170,7 @@ namespace CraftingGillionaire.ViewModels
             }
             else
             {
-                CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.SearchRequestData.ServerName);
+                CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.MarketshareSearchRequestData.ServerName);
                 foreach (MarketshareResonseItem responseItem in responseData.ResonseItems)
                 {
                     int itemID = Int32.Parse(responseItem.ItemID);
@@ -266,7 +297,7 @@ namespace CraftingGillionaire.ViewModels
             this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerContentVisible));
             this.RaisePropertyChanged(nameof(this.HasGarlandToolsException));
 
-            CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.SearchRequestData.ServerName);
+            CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.MarketshareSearchRequestData.ServerName);
             await craftingAnalyzerItemBuilder.FillTreeCosts(marketshareInfo.TreeRootNode, marketshareInfo.QuantitySold);
             this.IsCraftingAnalyzerPreparingLabelVisible = false;
             this.IsCraftingAnalyzerContentVisible = true;
@@ -322,8 +353,8 @@ namespace CraftingGillionaire.ViewModels
             this.IsFilterPanelVisible = false;
             this.RaisePropertyChanged(nameof(this.IsFilterPanelVisible));
 
-            this.SearchRequestData.OnFiltersPanelOkClick();
-            this.RaisePropertyChanged(nameof(this.SearchRequestData));
+            this.MarketshareSearchRequestData.OnFiltersPanelOkClick();
+            this.RaisePropertyChanged(nameof(this.MarketshareSearchRequestData));
             this.IsStartSearchLabelVisible = true;
             this.RaisePropertyChanged(nameof(this.IsStartSearchLabelVisible));
         }
@@ -350,12 +381,96 @@ namespace CraftingGillionaire.ViewModels
             this.IsRowsFilterPanelVisible = false;
             this.RaisePropertyChanged(nameof(this.IsRowsFilterPanelVisible));
 
-            this.SearchRequestData.OnRowsFilterPanelOkClick();
-            this.RaisePropertyChanged(nameof(this.SearchRequestData));
+            this.MarketshareSearchRequestData.OnRowsFilterPanelOkClick();
+            this.RaisePropertyChanged(nameof(this.MarketshareSearchRequestData));
             this.IsStartSearchLabelVisible = true;
             this.RaisePropertyChanged(nameof(this.IsStartSearchLabelVisible));
         }
 
+        #endregion
+
+        #region SalesHistory
+        
+        public async void OnSalesHistorySearchClick()
+        {
+            this.IsStartSearchHistoryLabelVisible = false;
+            this.HasSalesHistoryException = false;
+            this.SalesHistoryException = String.Empty;
+            this.IsSearchHistoryPanelVisible = false;
+            this.IsSearchHistoryPreparingPanelVisible = true;
+
+            this.RaisePropertyChanged(nameof(this.HasSalesHistoryException));
+            this.RaisePropertyChanged(nameof(this.SalesHistoryException));
+            this.RaisePropertyChanged(nameof(this.IsSearchHistoryPanelVisible));
+            this.RaisePropertyChanged(nameof(this.IsSearchHistoryPreparingPanelVisible));
+            this.RaisePropertyChanged(nameof(this.IsStartSearchHistoryLabelVisible));
+
+            ItemIDResult itemIDResult = await XIVAPIHelper.GetItemNameByID(this.SalesHistoryRequestData.ItemName);
+            if (itemIDResult.HasException)
+            {
+                this.HasSalesHistoryException = true;
+                this.SalesHistoryException = itemIDResult.Exception;
+                this.IsSearchHistoryPreparingPanelVisible = false;
+                this.IsSearchHistoryPanelVisible = false;
+
+                this.RaisePropertyChanged(nameof(this.HasSalesHistoryException));
+                this.RaisePropertyChanged(nameof(this.SalesHistoryException));
+                this.RaisePropertyChanged(nameof(this.IsSearchHistoryPanelVisible));
+                this.RaisePropertyChanged(nameof(this.IsSearchHistoryPreparingPanelVisible));
+            }
+            else
+            {
+                SalesHistoryResult result = await UniversalisHelper.GetSalesHistory(this.SalesHistoryRequestData.ServerName, itemIDResult.ID, this.SalesHistoryRequestData.TimePeriod);
+                if (result.HasException)
+                {
+                    this.HasSalesHistoryException = true;
+                    this.SalesHistoryException = result.Exception;
+                    this.IsSearchHistoryPreparingPanelVisible = false;
+                    this.IsSearchHistoryPanelVisible = false;
+
+                    this.RaisePropertyChanged(nameof(this.HasSalesHistoryException));
+                    this.RaisePropertyChanged(nameof(this.SalesHistoryException));
+                    this.RaisePropertyChanged(nameof(this.IsSearchHistoryPanelVisible));
+                    this.RaisePropertyChanged(nameof(this.IsSearchHistoryPreparingPanelVisible));
+                }
+                else
+                {
+                    this.HQSalesHistory.Clear();
+                    this.NQSalesHistory.Clear();
+                    foreach (SaleEntry saleEntry in result.SaleEntries)
+                    {
+                        SaleDisplayItem saleDisplayItem = new SaleDisplayItem(saleEntry);
+                        if (saleDisplayItem.IsHQ)
+                            this.HQSalesHistory.Add(saleDisplayItem);
+                        else
+                            this.NQSalesHistory.Add(saleDisplayItem);
+                    }
+
+                    this.IsNQSalesHistoryEmpty = this.NQSalesHistory.Count == 0;
+                    this.IsHQSalesHistoryEmpty = this.HQSalesHistory.Count == 0;
+                    this.NQSalesHistoryStats = new SalesHistoryStats(this.NQSalesHistory);
+                    this.HQSalesHistoryStats = new SalesHistoryStats(this.HQSalesHistory);
+
+                    this.HasSalesHistoryException = false;
+                    this.SalesHistoryException = String.Empty;
+                    this.IsSearchHistoryPreparingPanelVisible = false;
+                    this.IsSearchHistoryPanelVisible = true;
+
+                    this.RaisePropertyChanged(nameof(this.NQSalesHistory));
+                    this.RaisePropertyChanged(nameof(this.HQSalesHistory));
+                    this.RaisePropertyChanged(nameof(this.NQSalesHistoryStats));
+                    this.RaisePropertyChanged(nameof(this.HQSalesHistoryStats));
+                    this.RaisePropertyChanged(nameof(this.HasSalesHistoryException));
+                    this.RaisePropertyChanged(nameof(this.SalesHistoryException));
+                    this.RaisePropertyChanged(nameof(this.IsSearchHistoryPanelVisible));
+                    this.RaisePropertyChanged(nameof(this.IsSearchHistoryPreparingPanelVisible));
+                    this.RaisePropertyChanged(nameof(this.IsHQSalesHistoryEmpty));
+                    this.RaisePropertyChanged(nameof(this.IsNQSalesHistoryEmpty));
+                }
+            }
+        }
+
+        #endregion
 
         private void OpenLink(string url)
         {
@@ -377,7 +492,7 @@ namespace CraftingGillionaire.ViewModels
         private int[] ConvertFiltersToIDs()
         {
             List<int> result = new List<int>();
-            foreach (MarketshareFilterItem selectedFilter in this.SearchRequestData.SelectedFilterItems)
+            foreach (MarketshareFilterItem selectedFilter in this.MarketshareSearchRequestData.SelectedFilterItems)
                 result.Add(selectedFilter.ID);
 
             return result.ToArray();

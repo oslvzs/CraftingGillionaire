@@ -12,7 +12,7 @@ namespace CraftingGillionaire.API.Saddlebag
 {
     internal static class SaddlebagHelper
     {
-        internal static MarketshareRequest CreateRequestObject(SearchRequestData requestData, SortBy? sortByValue, int[] filters)
+        internal static MarketshareRequest CreateRequestObject(MarketshareSearchRequestData requestData, SortBy? sortByValue, int[] filters)
         {
             string sortBy = String.Empty;
             switch (sortByValue)

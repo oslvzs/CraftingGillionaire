@@ -74,5 +74,24 @@ namespace CraftingGillionaire.API.Universalis
                 return new MarketListingsResult("Could not get response from Universalis. Try again later!");
             }
         }
+
+        internal static async Task<SalesHistoryResult> GetSalesHistory(string serverName, int itemID, int hours)
+        {
+            long seconds = hours * 60 * 60;
+            HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            try
+            {
+                HttpResponseMessage responseObject = await httpClient.GetAsync($"https://universalis.app/api/v2/history/{serverName}/{itemID}?entriesToReturn=999999&entriesWithin={seconds}");
+                responseObject.EnsureSuccessStatusCode();
+                string responseBody = await responseObject.Content.ReadAsStringAsync();
+                SalesHistoryResponse response = JsonSerializer.Deserialize<SalesHistoryResponse>(responseBody) ?? new SalesHistoryResponse();
+                return new SalesHistoryResult(response.Entries);
+            }
+            catch (HttpRequestException ex)
+            {
+                return new SalesHistoryResult("Could not get response from Universalis. Try again later!");
+            }           
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CraftingGillionaire.Models
+namespace CraftingGillionaire.Models.SalesHistory
 {
     public class SalesHistoryStats
     {

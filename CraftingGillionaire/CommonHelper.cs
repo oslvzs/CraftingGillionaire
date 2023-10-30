@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace CraftingGillionaire
 {
-	internal static class CommonInfoHelper
+	internal static class CommonHelper
 	{
 		internal static string GetDatacenterByServerName(string serverName)
 		{
@@ -206,5 +208,22 @@ namespace CraftingGillionaire
 					throw new Exception($"Unsupported jobID: {jobID}.");
 			}
 		}
-	}
+
+        internal static void OpenLink(string url)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                url = url.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Process.Start("xdg-open", url);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", url);
+            }
+        }
+    }
 }

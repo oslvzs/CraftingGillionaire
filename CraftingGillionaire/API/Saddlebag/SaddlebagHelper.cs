@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using CraftingGillionaire.API.Saddlebag.API;
 using CraftingGillionaire.Models;
-using CraftingGillionaire.API.GarlandTools;
 
 namespace CraftingGillionaire.API.Saddlebag
 {

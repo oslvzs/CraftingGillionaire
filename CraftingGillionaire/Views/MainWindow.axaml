@@ -115,7 +115,7 @@
         </StackPanel>
         <Button Grid.Column="3"
     Width="70"
-    Command="{Binding MainWindowViewModel.OnSalesHistorySearchClick}"
+    Command="{Binding OnSalesHistorySearchClick}"
     HorizontalContentAlignment="Center"
     Height="30"
     Margin="10">Search</Button>
@@ -156,7 +156,7 @@
 						Margin="5"
 						VerticalAlignment="Center">
           <TextBlock>Filters:</TextBlock>
-          <Button Content="Select filters" Command="{Binding OnFiltersButtonClick}" ></Button>
+          <Button Content="Select filters" Command="{Binding TabLogic.OnFiltersButtonClick}" ></Button>
           <TextBlock>
             <Run FontSize="12" Text="{Binding SelectedFilterItemsCount}"></Run>
             <Run FontSize="12" Text="filters picked"></Run>
@@ -166,15 +166,15 @@
     Margin="5"
     VerticalAlignment="Center">
           <TextBlock>Data filter mode:</TextBlock>
-          <Button Content="Select filter mode" Command="{Binding OnRowsFilterButtonClick}" ></Button>
+          <Button Content="Select filter mode" Command="{Binding TabLogic.OnRowsFilterButtonClick}" ></Button>
           <TextBlock>
             <Run FontSize="12" Text="{Binding RowsSelectedFilterItem.Name}"></Run>
           </TextBlock>
         </StackPanel>
         <Button Grid.Column="6"
     Width="70"
-    IsVisible="{Binding MainWindowViewModel.IsSearchButtonVisible, Mode=OneWayToSource}"
-    Command="{Binding MainWindowViewModel.OnMarketshareSearchClick}"
+    IsVisible="{Binding TabLogic.IsSearchButtonVisible}"
+    Command="{Binding OnMarketshareSearchClick}"
     HorizontalContentAlignment="Center"
     Height="30"
     Margin="10">Search</Button>
@@ -208,7 +208,7 @@
                   FontSize="20"
                   FontWeight="Bold"
                   Content="{Binding ItemInfo.ItemName}"
-                  Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnItemLinkClick}"
+                  Command="{Binding OnItemLinkClick}"
                   CommandParameter="{Binding ItemInfo.ItemID}" />
               <TextBlock FontSize="20"
                     FontWeight="Bold"
@@ -283,7 +283,7 @@
                       Content="{Binding ItemInfo.ItemName}"
                       FontSize="13"
                       FontWeight="Bold"
-                      Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnItemLinkClick}"
+                      Command="{Binding OnItemLinkClick}"
                       CommandParameter="{Binding ItemInfo.ItemID}" />
                   <TextBlock FontSize="14">
                     <Run Text="{Binding Amount}" />
@@ -374,7 +374,7 @@
 										HorizontalAlignment="Center"
 										Classes="hyperlink"
 										Content="Open Link"
-										Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnLinkClick}"
+										Command="{Binding OnLinkClick}"
 										CommandParameter="{Binding URL}" />
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
@@ -388,7 +388,7 @@
                 <Button
 									HorizontalAlignment="Center"
 									HorizontalContentAlignment="Center"
-									Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).OnAnalyzeClick}"
+									Command="{Binding #SaddlebagTable.((vm:MainWindowViewModel)DataContext).MarketshareTabLogic.OnAnalyzeClick}"
 									CommandParameter="{Binding .}"
 									Content="Analyze" />
               </DataTemplate>
@@ -472,13 +472,13 @@
         <TabItem Header="Crafting Analyzer" FontSize="16" FontWeight="Bold">
           <Panel>
             <Grid Grid.Row="0"
-              IsVisible="{Binding IsCraftingAnalyzerVisible}"
+              IsVisible="{Binding MarketshareTabLogic.IsCraftingAnalyzerVisible}"
               RowDefinitions="65, *">
               <Grid Background="Gray"
                   Grid.Row="0"
                   ColumnDefinitions="80, *, 80">
                 <Button Grid.Column="0"
-                    Command="{Binding OnCraftingAnalyzerBackClick}"
+                    Command="{Binding MarketshareTabLogic.OnCraftingAnalyzerBackClick}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Content="Back"/>
@@ -489,36 +489,36 @@
                      VerticalAlignment="Center">Crafting analyzer</Label>
               </Grid>
               <Label Grid.Row="1"
-                   IsVisible="{Binding IsCraftingAnalyzerPreparingLabelVisible}"
+                   IsVisible="{Binding MarketshareTabLogic.IsCraftingAnalyzerPreparingLabelVisible}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    FontSize="32">Analyzing receipt, please wait...</Label>
               <TextBlock Grid.Row="1"
-                IsVisible="{Binding HasGarlandToolsException}"
+                IsVisible="{Binding MarketshareTabLogic.HasGarlandToolsException}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    FontSize="32"
                    FontWeight="Bold"
                    Foreground="Red"
-                   Text="{Binding GarlandToosException}" />
+                   Text="{Binding MarketshareTabLogic.GarlandToosException}" />
               <ContentControl Grid.Row="1"
-                      IsVisible="{Binding IsCraftingAnalyzerContentVisible}"
-                      Content="{Binding CraftingAnalyzerItem}" />
+                      IsVisible="{Binding MarketshareTabLogic.IsCraftingAnalyzerContentVisible}"
+                      Content="{Binding MarketshareTabLogic.CraftingAnalyzerItem}" />
             </Grid>
 
             <Grid Grid.Row="1"
-                IsVisible="{Binding IsSaddlebagGridVisible}"
+                IsVisible="{Binding MarketshareTabLogic.IsSaddlebagGridVisible}"
                 RowDefinitions="75, *">
-              <ContentControl Grid.Row="0" Content="{Binding MarketshareSearchRequestData}" />
-              <ContentControl Content="{Binding MarketshareInfos}"
+              <ContentControl Grid.Row="0" Content="{Binding MarketshareTabLogic.SearchRequestData}" />
+              <ContentControl Content="{Binding MarketshareTabLogic.MarketshareInfos}"
                       Grid.Row="1"
                       Name="SaddlebagTable"
-                      IsVisible="{Binding IsSearchDataGridVisible}"
+                      IsVisible="{Binding MarketshareTabLogic.IsSearchDataGridVisible}"
                       HorizontalAlignment="Center" />
               <Grid Grid.Row="1"
                   ColumnDefinitions="*, 5*, *"
                   RowDefinitions="40, *, 40"
-                  IsVisible="{Binding IsFilterPanelVisible}">
+                  IsVisible="{Binding MarketshareTabLogic.IsFilterPanelVisible}">
                 <Label Grid.Column="1"
                      Grid.Row="0"
                      HorizontalAlignment="Center"
@@ -527,8 +527,8 @@
                 <ListBox Grid.Column="1"
                      Grid.Row="1"
                      SelectionMode="Multiple, Toggle"
-                     ItemsSource="{Binding MarketshareSearchRequestData.FilterItems}"
-                         SelectedItems="{Binding MarketshareSearchRequestData.SelectedFilterItems}">
+                     ItemsSource="{Binding MarketshareTabLogic.SearchRequestData.FilterItems}"
+                         SelectedItems="{Binding MarketshareTabLogic.SearchRequestData.SelectedFilterItems}">
                   <ListBox.ItemTemplate>
                     <DataTemplate>
                       <TextBlock Text="{Binding Name}"></TextBlock>
@@ -540,12 +540,12 @@
                     Content="Apply"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Command="{Binding OnFiltersPanelOkClick}" />
+                    Command="{Binding MarketshareTabLogic.OnFiltersPanelOkClick}" />
               </Grid>
               <Grid Grid.Row="1"
               ColumnDefinitions="*, 5*, *"
               RowDefinitions="40, *, 40"
-              IsVisible="{Binding IsRowsFilterPanelVisible}">
+              IsVisible="{Binding MarketshareTabLogic.IsRowsFilterPanelVisible}">
                 <Label Grid.Column="1"
                      Grid.Row="0"
                      HorizontalAlignment="Center"
@@ -554,8 +554,8 @@
                 <ListBox Grid.Column="1"
                      Grid.Row="1"
                      SelectionMode="Single, Toggle"
-                     ItemsSource="{Binding MarketshareSearchRequestData.RowsFilterItems}"
-                         SelectedItem="{Binding MarketshareSearchRequestData.RowsSelectedFilterItem}">
+                     ItemsSource="{Binding MarketshareTabLogic.SearchRequestData.RowsFilterItems}"
+                         SelectedItem="{Binding MarketshareTabLogic.SearchRequestData.RowsSelectedFilterItem}">
                   <ListBox.ItemTemplate>
                     <DataTemplate>
                       <TextBlock Text="{Binding Name}"></TextBlock>
@@ -567,27 +567,27 @@
                     Content="Done"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Command="{Binding OnRowsFiltersPanelOkClick}" />
+                    Command="{Binding MarketshareTabLogic.OnRowsFiltersPanelOkClick}" />
               </Grid>
               <Label Grid.Row="1"
-                   IsVisible="{Binding IsStartSearchLabelVisible}"
+                   IsVisible="{Binding MarketshareTabLogic.IsStartSearchLabelVisible}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    FontWeight="Bold"
                    FontSize="32">Start search!</Label>
               <Label Grid.Row="1"
-                   IsVisible="{Binding IsLoadingSearchResultPanelVisible}"
+                   IsVisible="{Binding MarketshareTabLogic.IsLoadingSearchResultPanelVisible}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    FontSize="32">Searching info, please wait...</Label>
               <TextBlock Grid.Row="1"
-                     IsVisible="{Binding HasSaddlebagException}"
+                     IsVisible="{Binding MarketshareTabLogic.HasSaddlebagException}"
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center"
                      FontSize="32"
                      FontWeight="Bold"
                      Foreground="Red"
-                     Text="{Binding SaddlebagException}"
+                     Text="{Binding MarketshareTabLogic.SaddlebagException}"
                      TextWrapping="WrapWithOverflow" />
             </Grid>
           </Panel>
@@ -595,49 +595,49 @@
         <TabItem Header="Sales history" FontSize="16" FontWeight="Bold">
           <Panel>
             <Grid RowDefinitions="75,*">
-              <ContentControl Grid.Row="0" Content="{Binding SalesHistoryRequestData}" />
-              <TextBlock Grid.Row="1" IsVisible="{Binding IsStartSearchHistoryLabelVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Text="Start the search!"/>
-              <TextBlock Grid.Row="1" IsVisible="{Binding IsSearchHistoryPreparingPanelVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Text="Searching info, please wait..."/>
-              <TextBlock Grid.Row="1" IsVisible="{Binding HasSalesHistoryException}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Foreground="Red" Text="{Binding SalesHistoryException}"/>
-              <Grid Grid.Row="1" IsVisible="{Binding IsSearchHistoryPanelVisible}" ColumnDefinitions="*, 5, *">
-                <TextBlock Grid.Column="0" IsVisible="{Binding IsNQSalesHistoryEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontWeight="Bold" Text="No NQ sales!"/>
-                <Grid Grid.Column="0" IsVisible="{Binding !IsNQSalesHistoryEmpty}" RowDefinitions="100, *" Margin="5">
+              <ContentControl Grid.Row="0" Content="{Binding SalesHistoryTabLogic.SalesHistoryRequestData}" />
+              <TextBlock Grid.Row="1" IsVisible="{Binding SalesHistoryTabLogic.IsStartSearchHistoryLabelVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Text="Start the search!"/>
+              <TextBlock Grid.Row="1" IsVisible="{Binding SalesHistoryTabLogic.IsSearchHistoryPreparingPanelVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Text="Searching info, please wait..."/>
+              <TextBlock Grid.Row="1" IsVisible="{Binding SalesHistoryTabLogic.HasSalesHistoryException}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32" FontWeight="Bold" Foreground="Red" Text="{Binding SalesHistoryTabLogic.SalesHistoryException}"/>
+              <Grid Grid.Row="1" IsVisible="{Binding SalesHistoryTabLogic.IsSearchHistoryPanelVisible}" ColumnDefinitions="*, 5, *">
+                <TextBlock Grid.Column="0" IsVisible="{Binding SalesHistoryTabLogic.IsNQSalesHistoryEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontWeight="Bold" Text="No NQ sales!"/>
+                <Grid Grid.Column="0" IsVisible="{Binding !SalesHistoryTabLogic.IsNQSalesHistoryEmpty}" RowDefinitions="100, *" Margin="5">
                   <StackPanel Grid.Row="0" Orientation="Vertical">
                     <TextBlock HorizontalAlignment="Center" FontWeight="Bold" FontSize="20">NQ sales</TextBlock>
                     <TextBlock>
                       <Run>Total sales:</Run>
-                      <Run Text="{Binding NQSalesHistoryStats.TotalSells}"></Run>
+                      <Run Text="{Binding SalesHistoryTabLogic.NQSalesHistoryStats.TotalSells}"></Run>
                     </TextBlock>
                     <TextBlock>
                       <Run>Total units sold:</Run>
-                      <Run Text="{Binding NQSalesHistoryStats.TotalUnitsSold}"></Run>
+                      <Run Text="{Binding SalesHistoryTabLogic.NQSalesHistoryStats.TotalUnitsSold}"></Run>
                     </TextBlock>
                     <TextBlock>
                       <Run>Average price:</Run>
-                      <Run Text="{Binding NQSalesHistoryStats.AveragePrice}"></Run>
+                      <Run Text="{Binding SalesHistoryTabLogic.NQSalesHistoryStats.AveragePrice}"></Run>
                     </TextBlock>
                   </StackPanel>
-                  <ContentControl Grid.Row="1" Content="{Binding NQSalesHistory}"></ContentControl> 
+                  <ContentControl Grid.Row="1" Content="{Binding SalesHistoryTabLogic.NQSalesHistory}"></ContentControl> 
                 </Grid>
                 <Panel Grid.Column="1" Background="Gray"></Panel>
-                <TextBlock Grid.Column="2" IsVisible="{Binding IsHQSalesHistoryEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontWeight="Bold" Text="No HQ sales!"/>
-                <Grid Grid.Column="2" IsVisible="{Binding !IsHQSalesHistoryEmpty}" RowDefinitions="100, *" Margin="5">
+                <TextBlock Grid.Column="2" IsVisible="{Binding SalesHistoryTabLogic.IsHQSalesHistoryEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontWeight="Bold" Text="No HQ sales!"/>
+                <Grid Grid.Column="2" IsVisible="{Binding !SalesHistoryTabLogic.IsHQSalesHistoryEmpty}" RowDefinitions="100, *" Margin="5">
                   <StackPanel Grid.Row="0">
                     <TextBlock HorizontalAlignment="Center" FontWeight="Bold" FontSize="20">HQ sales</TextBlock>
                     <TextBlock>
                       <Run>Total sales:</Run>
-                      <Run Text="{Binding HQSalesHistoryStats.TotalSells}"></Run>
+                      <Run Text="{Binding SalesHistoryTabLogic.HQSalesHistoryStats.TotalSells}"></Run>
                     </TextBlock>
                     <TextBlock>
                       <Run>Total units sold:</Run>
-                      <Run Text="{Binding HQSalesHistoryStats.TotalUnitsSold}"></Run>
+                      <Run Text="{Binding SalesHistoryTabLogic.HQSalesHistoryStats.TotalUnitsSold}"></Run>
                     </TextBlock>
                     <TextBlock>
                       <Run>Average price:</Run>
-                      <Run Text="{Binding HQSalesHistoryStats.AveragePrice}"></Run>
+                      <Run Text="{Binding SalesHistoryTabLogic.HQSalesHistoryStats.AveragePrice}"></Run>
                     </TextBlock>
                   </StackPanel>
-                  <ContentControl Grid.Row="1" Content="{Binding HQSalesHistory}"></ContentControl>
+                  <ContentControl Grid.Row="1" Content="{Binding SalesHistoryTabLogic.HQSalesHistory}"></ContentControl>
                 </Grid>
               </Grid>
             </Grid>

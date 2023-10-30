@@ -42,5 +42,11 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
                 return this.JobInfo != null && !this.JobInfo.UserCanCraft;
             }
         }
+
+        public void OnItemLinkClick(int itemID)
+        {
+            string url = $"https://universalis.app/market/{itemID}";
+            CommonHelper.OpenLink(url);
+        }
     }
 }

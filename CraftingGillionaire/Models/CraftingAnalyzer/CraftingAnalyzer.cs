@@ -15,7 +15,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
         {
             this.UserInfo = userInfo;
             this.ServerName = serverName;
-            this.DataCenterName = CommonInfoHelper.GetDatacenterByServerName(serverName);
+            this.DataCenterName = CommonHelper.GetDatacenterByServerName(serverName);
         }
 
         private UserInfo UserInfo { get; }
@@ -241,7 +241,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             int jobLevel = craftInfo.JobLevel;
             int jobID = craftInfo.JobID;
             if (jobID > 0)
-                jobName = CommonInfoHelper.GetJobNameByID(jobID);
+                jobName = CommonHelper.GetJobNameByID(jobID);
             bool userCanCraft = this.CanCraftItem(jobID, jobLevel);
 
             return new NodeJobInfo(jobName, jobLevel, userCanCraft);

@@ -47,5 +47,11 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
                 return this.CostsInfo.IsMarketboardCheaper && this.CostsInfo.CraftingCosts != Int32.MaxValue && this.CostsInfo.CraftingCosts > this.CostsInfo.MarketboardCosts;
             }
         }
+
+        public void OnItemLinkClick(int itemID)
+        {
+            string url = $"https://universalis.app/market/{itemID}";
+            CommonHelper.OpenLink(url);
+        }
     }
 }

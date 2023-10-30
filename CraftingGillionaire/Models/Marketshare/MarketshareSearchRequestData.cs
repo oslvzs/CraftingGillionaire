@@ -1,20 +1,22 @@
 ﻿using CraftingGillionaire.API.Saddlebag;
-using CraftingGillionaire.ViewModels;
+using CraftingGillionaire.Models.Marketshare;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace CraftingGillionaire.Models
 {
-	public class MarketshareSearchRequestData : ReactiveObject
+    public class MarketshareSearchRequestData : ReactiveObject
 	{
-		public MarketshareSearchRequestData(MainWindowViewModel mainWindowViewModel)
+		public MarketshareSearchRequestData(MarketshareTabLogic tabLogic)
 		{
-			this.MainWindowViewModel = mainWindowViewModel;
-		}
+            this.TabLogic = tabLogic;
+            this.RowsSelectedFilterItem = this.RowsFilterItems.First();
+        }
 
-		public MainWindowViewModel MainWindowViewModel { get; }
+        public MarketshareTabLogic TabLogic { get; }
 
 		public string ServerName { get; set; }
 
@@ -27,7 +29,7 @@ namespace CraftingGillionaire.Models
 				if (Int32.TryParse(value, out int timePeriod))
 				{
 					this.TimePeriod = timePeriod;
-					this.MainWindowViewModel.RaisePropertyChanged(nameof(TimePeriodString));
+					this.RaisePropertyChanged(nameof(this.TimePeriodString));
 				}
 			}
 		}
@@ -42,7 +44,7 @@ namespace CraftingGillionaire.Models
 				if (Int32.TryParse(value, out int salesAmount))
 				{
 					this.SalesAmount = salesAmount;
-					this.MainWindowViewModel.RaisePropertyChanged(nameof(SalesAmountString));
+					this.RaisePropertyChanged(nameof(this.SalesAmountString));
 				}
 			}
 		}
@@ -56,7 +58,7 @@ namespace CraftingGillionaire.Models
 				if (Int32.TryParse(value, out int averagePrice))
 				{
 					this.AveragePrice = averagePrice;
-					this.MainWindowViewModel.RaisePropertyChanged(nameof(AveragePriceString));
+					this.RaisePropertyChanged(nameof(this.AveragePriceString));
 				}
 			}
 		}
@@ -64,7 +66,7 @@ namespace CraftingGillionaire.Models
 		public SortBy SortBy { get; set; } = SortBy.AveragePrice;
 
 
-		public List<MarketshareFilterItem> FilterItems { get; private set; } = new List<MarketshareFilterItem>()
+		public List<MarketshareFilterItem> FilterItems { get; } = new List<MarketshareFilterItem>()
 		{
 			new MarketshareFilterItem("Everything", 0),
             new MarketshareFilterItem("Purchasable from NPC Vendor", -1),
@@ -157,9 +159,9 @@ namespace CraftingGillionaire.Models
 
 		public ObservableCollection<MarketshareFilterItem> SelectedFilterItems { get; } = new ObservableCollection<MarketshareFilterItem>();
         
-        public int SelectedFilterItemsCount { get; set; } = 0;
+        public int SelectedFilterItemsCount { get; private set; } = 0;
 
-        public List<RowsFilterItem> RowsFilterItems { get; private set; } = new List<RowsFilterItem>()
+        public List<RowsFilterItem> RowsFilterItems { get; } = new List<RowsFilterItem>()
         {
             new RowsFilterItem("Everything", 0),
             new RowsFilterItem("Only craftable", 1),
@@ -169,25 +171,20 @@ namespace CraftingGillionaire.Models
 
         public RowsFilterItem RowsSelectedFilterItem { get; set; }
 
-		public void OnFiltersButtonClick()
-		{
-			this.MainWindowViewModel.OnFiltersButtonClick();
-		}
-
 		public void OnFiltersPanelOkClick()
 		{
 			this.SelectedFilterItemsCount = this.SelectedFilterItems.Count;
-			this.RaisePropertyChanged(nameof(this.SelectedFilterItemsCount));
+            this.RaisePropertyChanged(nameof(this.SelectedFilterItemsCount));
 		}
 
-        public void OnRowsFilterButtonClick()
-        {
-            this.MainWindowViewModel.OnRowsFilterButtonClick();
-        }
-
-        public void OnRowsFilterPanelOkClick()
+        public void OnRowsFiltersPanelOkClick()
         {
             this.RaisePropertyChanged(nameof(this.RowsSelectedFilterItem));
         }
-	}
+
+        public async void OnMarketshareSearchClick()
+        {
+            await this.TabLogic.OnMarketshareSearchClick();
+        }
+    }
 }

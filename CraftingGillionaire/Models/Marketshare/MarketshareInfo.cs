@@ -25,5 +25,10 @@ namespace CraftingGillionaire.Models
 		public string URL { get; set; }
 
 		public CraftingTreeRootNode TreeRootNode { get; set; }
-	}
+
+        public void OnLinkClick(string url)
+        {
+            CommonHelper.OpenLink(url);
+        }
+    }
 }

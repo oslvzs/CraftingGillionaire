@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace CraftingGillionaire.Models.SalesHistory
 {
-    public class SalesHistoryStats
+    public class SalesHistoryStats : ReactiveObject
     {
         public SalesHistoryStats(ObservableCollection<SaleDisplayItem> salesHistory)
         {

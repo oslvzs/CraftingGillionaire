@@ -110,6 +110,8 @@ namespace CraftingGillionaire.Models
                     this.RaisePropertyChanged(nameof(this.SalesHistoryException));
                     this.RaisePropertyChanged(nameof(this.IsSearchHistoryPreparingPanelVisible));
                     this.RaisePropertyChanged(nameof(this.IsSearchHistoryPanelVisible));
+                    this.RaisePropertyChanged(nameof(this.NQSalesHistoryStats));
+                    this.RaisePropertyChanged(nameof(this.HQSalesHistoryStats));
                 }
             }
         }

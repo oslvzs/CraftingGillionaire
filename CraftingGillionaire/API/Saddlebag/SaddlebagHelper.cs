@@ -52,7 +52,7 @@ namespace CraftingGillionaire.API.Saddlebag
         {
             HttpClient httpClient = new HttpClient()
             {
-                Timeout = TimeSpan.FromSeconds(150)
+                Timeout = TimeSpan.FromSeconds(180)
             };
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             string requestString = JsonSerializer.Serialize(request, JsonSerializerOptions.Default);

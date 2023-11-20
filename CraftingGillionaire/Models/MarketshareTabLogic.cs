@@ -69,15 +69,17 @@ namespace CraftingGillionaire.Models
             this.MarketshareInfos.Clear();
             this.MarketshareInfos.AddRange(marketshareInfoList);
 
-            if (this.SearchRequestData.RowsSelectedFilterItem != null)
-                this.MarketshareInfos = this.FilterMarketshareInfo(this.SearchRequestData.RowsSelectedFilterItem.ID);
+            if (!this.HasSaddlebagException && !this.HasGarlandToolsException)
+            {
+                if (this.SearchRequestData.RowsSelectedFilterItem != null)
+                    this.FilterMarketshareInfo(this.SearchRequestData.RowsSelectedFilterItem.ID);
+                
+                this.IsSearchDataGridVisible = true;                
+                this.RaisePropertyChanged(nameof(this.IsSearchDataGridVisible));
+            }
+
             this.IsLoadingSearchResultPanelVisible = false;
-
-            if (!this.HasSaddlebagException)
-                this.IsSearchDataGridVisible = true;
-
             this.RaisePropertyChanged(nameof(this.IsLoadingSearchResultPanelVisible));
-            this.RaisePropertyChanged(nameof(this.IsSearchDataGridVisible));
         }
 
         private async Task<ObservableCollection<MarketshareInfo>> GetMarketshareInfo()
@@ -137,12 +139,12 @@ namespace CraftingGillionaire.Models
             return marketshareInfoList;
         }
 
-        private ObservableCollection<MarketshareInfo> FilterMarketshareInfo(int mode)
+        private void FilterMarketshareInfo(int mode)
         {
             ObservableCollection<MarketshareInfo> result = new ObservableCollection<MarketshareInfo>();
             if (mode == 0)
             {
-                return this.MarketshareInfos;
+                return;
             }
 
             foreach (MarketshareInfo marketshareInfo in this.MarketshareInfos)
@@ -186,7 +188,9 @@ namespace CraftingGillionaire.Models
                 }
             }
 
-            return result;
+            this.MarketshareInfos.Clear();
+            foreach (MarketshareInfo marketshareInfo in result)
+                this.MarketshareInfos.Add(marketshareInfo);
         }
 
         private bool CheckNodeCraftable(CraftingTreeNode node)

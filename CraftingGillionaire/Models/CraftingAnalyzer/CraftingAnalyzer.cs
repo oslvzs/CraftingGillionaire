@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CraftingGillionaire.Models.User;
+using System.Threading;
 
 namespace CraftingGillionaire.Models.CraftingAnalyzer
 {
@@ -62,7 +63,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             int nodeItemID = recipePart.ID;
             int amount = recipePart.Amount;
             string nodeItemName;
-            IngredientInfo ingredientInfo = allIngredientsList.FirstOrDefault(x => x.ID == nodeItemID);
+            IngredientInfo? ingredientInfo = allIngredientsList.FirstOrDefault(x => x.ID == nodeItemID);
             if (ingredientInfo != null)
             {
                 bool isCraftable = ingredientInfo.CraftsList != null && ingredientInfo.CraftsList.Count > 0;
@@ -125,30 +126,73 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
                 }
             }
 
-            MarketMultipleMinPricesResult multipleMinPricesResult = await UniversalisHelper.GetItemsMinPriceDictionary(itemIDs, this.DataCenterName);
-            if (multipleMinPricesResult.HasException)
+            int multipleMinPricesExceptionCounter = 0;
+            MarketMultipleMinPricesResult? multipleMinPricesResult = null;
+            while (true)
             {
-                rootNode.HasException = true;
-                rootNode.Exception = multipleMinPricesResult.Exception;
-                return;
+                multipleMinPricesResult = await UniversalisHelper.GetItemsMinPriceDictionary(itemIDs, this.DataCenterName);
+                if (multipleMinPricesResult.HasException)
+                {
+                    if (multipleMinPricesExceptionCounter > 5)
+                    {
+                        rootNode.HasException = true;
+                        rootNode.Exception = multipleMinPricesResult.Exception;
+                        return;
+                    }
+                    multipleMinPricesExceptionCounter++;
+                    Thread.Sleep(2000);
+                }
+                else
+                    break;
             }
 
             Dictionary<int, int> minPricesDictionary = multipleMinPricesResult.MinPricesDictionary;
-            int recipeCosts;
-
-            MarketMinPriceResult itemMarketboardMinPriceResult = await UniversalisHelper.GetItemMinPrice(rootNode.ItemInfo.ItemID, this.ServerName);
-            if (itemMarketboardMinPriceResult.HasException)
+            int itemMarketboardMinPriceExceptionCounter = 0;
+            MarketMinPriceResult? itemMarketboardMinPriceResult = null;
+            while (true)
             {
-                rootNode.HasException = true;
-                rootNode.Exception = itemMarketboardMinPriceResult.Exception;
-                return;
+                itemMarketboardMinPriceResult = await UniversalisHelper.GetItemMinPrice(rootNode.ItemInfo.ItemID, this.ServerName);
+                if (itemMarketboardMinPriceResult.HasException)
+                {
+                    if (itemMarketboardMinPriceExceptionCounter > 5)
+                    {
+                        rootNode.HasException = true;
+                        rootNode.Exception = itemMarketboardMinPriceResult.Exception;
+                        return;
+                    }
+                    itemMarketboardMinPriceExceptionCounter++;
+                    Thread.Sleep(2000);
+                }
+                else
+                    break;
             }
 
+            int marketListingsExceptionCounter = 0;
+            MarketListingsResult? marketListingsResult = null;
+            while (true)
+            {
+                marketListingsResult = await UniversalisHelper.GetItemsListings(itemIDs, this.DataCenterName);
+                if (marketListingsResult.HasException)
+                {
+                    if (marketListingsExceptionCounter > 5)
+                    {
+                        rootNode.HasException = true;
+                        rootNode.Exception = marketListingsResult.Exception;
+                        return;
+                    }
+                    marketListingsExceptionCounter++;
+                    Thread.Sleep(2000);
+                }
+                else
+                    break;
+            }
+
+            int recipeCosts;
             if (rootNode.ItemInfo.IsCraftable)
             {
                 foreach (CraftingTreeNode treeNode in rootNode.ChildrenNodes)
                 {
-                    await this.FillNodeCosts(treeNode, rootNode.Ingredients, minPricesDictionary);
+                    await this.FillNodeCosts(treeNode, rootNode.Ingredients, minPricesDictionary, marketListingsResult.MarketListingsDictionary);
                 }
 
                 recipeCosts = rootNode.ChildrenNodes.Sum(x => x.CostsInfo.TotalCosts);
@@ -161,14 +205,14 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             rootNode.ProfitInfo = new CraftingTreeProfitInfo(recipeCosts, itemMarketboardMinPriceResult.MinPrice, quantitySold);
         }
 
-        private async Task FillNodeCosts(CraftingTreeNode node, List<IngredientInfo> allIngredients, Dictionary<int, int> minPricesDictionary)
+        private async Task FillNodeCosts(CraftingTreeNode node, List<IngredientInfo> allIngredients, Dictionary<int, int> minPricesDictionary, Dictionary<int, List<MarketListing>> marketListingsDictionary)
         {
             node.CostsInfo = new NodeCostsInfo();
             if (node.ItemInfo.IsCraftable)
             {
                 foreach (CraftingTreeNode childNode in node.ChildrenNodes)
                 {
-                    await this.FillNodeCosts(childNode, allIngredients, minPricesDictionary);
+                    await this.FillNodeCosts(childNode, allIngredients, minPricesDictionary, marketListingsDictionary);
                     if (childNode.HasException)
                     {
                         node.HasException = true;
@@ -182,7 +226,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             }
             
             node.CostsInfo.MarketboardCosts = minPricesDictionary[node.ItemInfo.ItemID];
-            IngredientInfo ingredientInfo = allIngredients.FirstOrDefault(x => x.ID == node.ItemInfo.ItemID);
+            IngredientInfo? ingredientInfo = allIngredients.FirstOrDefault(x => x.ID == node.ItemInfo.ItemID);
             if (ingredientInfo != null && ingredientInfo.Vendors != null && ingredientInfo.Vendors.Count > 0 && ingredientInfo.Price > 0)
             {
                 node.CostsInfo.VendorCosts = ingredientInfo.Price;
@@ -192,15 +236,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
             if (node.CostsInfo.IsMarketboardCheaper)
             {
-                MarketListingsResult marketListingsResult = await UniversalisHelper.GetItemListings(node.ItemInfo.ItemID, this.DataCenterName);
-                if (marketListingsResult.HasException) 
-                {
-                    node.HasException = true;
-                    node.Exception = marketListingsResult.Exception;
-                    return;
-                }
-
-                List<MarketListing> cheaperListings = marketListingsResult.MarketListings.Where(x => x.PricePerUnit <= node.CostsInfo.MinCosts).ToList();
+                List<MarketListing> cheaperListings = marketListingsDictionary[node.ItemInfo.ItemID].Where(x => x.PricePerUnit <= node.CostsInfo.MinCosts).ToList();
                 if (cheaperListings.Count > 0)
                     node.CostsInfo.MarketboardCheaperAmount = cheaperListings.Sum(x => x.Quantity);
             }
@@ -237,7 +273,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
         private NodeJobInfo GetJobInfo(CraftInfo craftInfo)
         {
-            string jobName = String.Empty;
+            string jobName = "Other";
             int jobLevel = craftInfo.JobLevel;
             int jobID = craftInfo.JobID;
             if (jobID > 0)
@@ -250,7 +286,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
         private bool CanCraftItem(int jobID, int minJobLevel)
         {
             if (jobID == 0)
-                return false;
+                return true;
 
             int currentUserJobLevel = this.UserInfo.GetLevelByJobID(jobID);
             return currentUserJobLevel >= minJobLevel;

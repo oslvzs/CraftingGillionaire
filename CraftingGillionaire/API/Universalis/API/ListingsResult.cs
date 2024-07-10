@@ -5,7 +5,7 @@ namespace CraftingGillionaire.API.Universalis.API
 {
     public class ListingsResult
     {
-        [JsonPropertyName("listings")]
-        public List<MarketListing> Listings { get; set; }
+        [JsonPropertyName("items")]
+        public Dictionary<string, MarketListingsList>? ListingsDictionary { get; set; }
     }
 }

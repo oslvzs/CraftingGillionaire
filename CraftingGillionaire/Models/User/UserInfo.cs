@@ -26,9 +26,14 @@ namespace CraftingGillionaire.Models.User
             get => this.CarpenterLevel.ToString();
             set
             {
-				if (Int32.TryParse(value, out int carpenterLevel) && carpenterLevel >= 0 && carpenterLevel <= 90)
+				if (Int32.TryParse(value, out int carpenterLevel))
 				{
-					this.CarpenterLevel = carpenterLevel;
+					if (carpenterLevel > 100)
+						this.CarpenterLevel = 100;
+					else if (carpenterLevel < 0)
+						this.CarpenterLevel = 1;
+					else 
+						this.CarpenterLevel = carpenterLevel;
 					this.RaisePropertyChanged(nameof(this.CarpenterLevelString));
 				}
 			}
@@ -40,34 +45,20 @@ namespace CraftingGillionaire.Models.User
 		public string BlacksmithLevelString
 		{
 			get => this.BlacksmithLevel.ToString();
-			set
-			{
-
-				string valueString = String.Empty;
-				if (String.IsNullOrEmpty(value))
-				{
-					this.BlacksmithLevel = 1;
-					this.RaisePropertyChanged(nameof(this.BlacksmithLevelString));
-				}
-				else if (value.Length > 2)
-				{ 
-					valueString = value.Substring(0, 2);
-				}
-				else
-				{
-					valueString = value;
-				}
-
-				if (!String.IsNullOrEmpty(valueString))
-				{
-					if (Int32.TryParse(valueString, out int blacksmithLevel) && blacksmithLevel >= 0 && blacksmithLevel <= 90)
-					{
-						this.BlacksmithLevel = blacksmithLevel;
-						this.RaisePropertyChanged(nameof(this.BlacksmithLevelString));
-					}
-				}
-			}
-		}
+            set
+            {
+                if (Int32.TryParse(value, out int level))
+                {
+                    if (level > 100)
+                        this.BlacksmithLevel = 100;
+                    else if (level < 0)
+                        this.BlacksmithLevel = 1;
+                    else
+                        this.BlacksmithLevel = level;
+                    this.RaisePropertyChanged(nameof(this.BlacksmithLevelString));
+                }
+            }
+        }
 
 		public int ArmorerLevel { get; set; } = 0;
 
@@ -75,15 +66,20 @@ namespace CraftingGillionaire.Models.User
 		public string ArmorerLevelString
 		{
 			get => this.ArmorerLevel.ToString();
-			set
-			{
-				if (Int32.TryParse(value, out int armorerLevel) && armorerLevel >= 0 && armorerLevel <= 90)
-				{
-					this.ArmorerLevel = armorerLevel;
-					this.RaisePropertyChanged(nameof(this.ArmorerLevelString));
-				}
-			}
-		}
+            set
+            {
+                if (Int32.TryParse(value, out int level))
+                {
+                    if (level > 100)
+                        this.ArmorerLevel = 100;
+                    else if (level < 0)
+                        this.ArmorerLevel = 1;
+                    else
+                        this.ArmorerLevel = level;
+                    this.RaisePropertyChanged(nameof(this.ArmorerLevelString));
+                }
+            }
+        }
 
 		public int GoldsmithLevel { get; set; } = 0;
 
@@ -91,15 +87,20 @@ namespace CraftingGillionaire.Models.User
 		public string GoldsmithLevelString
 		{
 			get => this.GoldsmithLevel.ToString();
-			set
-			{
-				if (Int32.TryParse(value, out int goldsmithLevel) && goldsmithLevel >= 0 && goldsmithLevel <= 90)
-				{
-					this.GoldsmithLevel = goldsmithLevel;
-					this.RaisePropertyChanged(nameof(this.GoldsmithLevelString));
-				}
-			}
-		}
+            set
+            {
+                if (Int32.TryParse(value, out int level))
+                {
+                    if (level > 100)
+                        this.GoldsmithLevel = 100;
+                    else if (level < 0)
+                        this.GoldsmithLevel = 1;
+                    else
+                        this.GoldsmithLevel = level;
+                    this.RaisePropertyChanged(nameof(this.GoldsmithLevelString));
+                }
+            }
+        }
 
 		public int LeatherworkerLevel { get; set; } = 0;
 
@@ -107,15 +108,20 @@ namespace CraftingGillionaire.Models.User
 		public string LeatherworkerLevelString
 		{
 			get => this.LeatherworkerLevel.ToString();
-			set
-			{
-				if (Int32.TryParse(value, out int leatherworkerLevel) && leatherworkerLevel >= 0 && leatherworkerLevel <= 90)
-				{
-					this.LeatherworkerLevel = leatherworkerLevel;
-					this.RaisePropertyChanged(nameof(this.LeatherworkerLevelString));
-				}
-			}
-		}
+            set
+            {
+                if (Int32.TryParse(value, out int level))
+                {
+                    if (level > 100)
+                        this.LeatherworkerLevel = 100;
+                    else if (level < 0)
+                        this.LeatherworkerLevel = 1;
+                    else
+                        this.LeatherworkerLevel = level;
+                    this.RaisePropertyChanged(nameof(this.LeatherworkerLevelString));
+                }
+            }
+        }
 
 		public int WeaverLevel { get; set; } = 0;
 
@@ -123,15 +129,20 @@ namespace CraftingGillionaire.Models.User
 		public string WeaverLevelString
 		{
 			get => this.WeaverLevel.ToString();
-			set
-			{
-				if (Int32.TryParse(value, out int weaverLevel) && weaverLevel >= 0 && weaverLevel <= 90)
-				{
-					this.WeaverLevel = weaverLevel;
-					this.RaisePropertyChanged(nameof(this.WeaverLevelString));
-				}
-			}
-		}
+            set
+            {
+                if (Int32.TryParse(value, out int level))
+                {
+                    if (level > 100)
+                        this.WeaverLevel = 100;
+                    else if (level < 0)
+                        this.WeaverLevel = 1;
+                    else
+                        this.WeaverLevel = level;
+                    this.RaisePropertyChanged(nameof(this.WeaverLevelString));
+                }
+            }
+        }
 
 		public int AlchemistLevel { get; set; } = 0;
 
@@ -139,15 +150,20 @@ namespace CraftingGillionaire.Models.User
 		public string AlchemistLevelString
 		{
 			get => this.AlchemistLevel.ToString();
-			set
-			{
-				if (Int32.TryParse(value, out int alchemistLevel) && alchemistLevel >= 0 && alchemistLevel <= 90)
-				{
-					this.AlchemistLevel = alchemistLevel;
-					this.RaisePropertyChanged(nameof(this.AlchemistLevelString));
-				}
-			}
-		}
+            set
+            {
+                if (Int32.TryParse(value, out int level))
+                {
+                    if (level > 100)
+                        this.AlchemistLevel = 100;
+                    else if (level < 0)
+                        this.AlchemistLevel = 1;
+                    else
+                        this.AlchemistLevel = level;
+                    this.RaisePropertyChanged(nameof(this.AlchemistLevelString));
+                }
+            }
+        }
 
 		public int CulinarianLevel { get; set; } = 0;
 
@@ -155,15 +171,20 @@ namespace CraftingGillionaire.Models.User
 		public string CulinarianLevelString
 		{
 			get => this.CulinarianLevel.ToString();
-			set
-			{
-				if (Int32.TryParse(value, out int culinarianLevel) && culinarianLevel >= 0 && culinarianLevel <= 90)
-				{
-					this.CulinarianLevel = culinarianLevel;
-					this.RaisePropertyChanged(nameof(this.CulinarianLevelString));
-				}
-			}
-		}
+            set
+            {
+                if (Int32.TryParse(value, out int level))
+                {
+                    if (level > 100)
+                        this.CulinarianLevel = 100;
+                    else if (level < 0)
+                        this.CulinarianLevel = 1;
+                    else
+                        this.CulinarianLevel = level;
+                    this.RaisePropertyChanged(nameof(this.CulinarianLevelString));
+                }
+            }
+        }
 
 		public int GetLevelByJobID(int jobID)
         {

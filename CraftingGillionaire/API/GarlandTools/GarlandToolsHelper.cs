@@ -24,7 +24,7 @@ namespace CraftingGillionaire.API.GarlandTools
             }
             catch (HttpRequestException ex)
             {
-                return new ItemInfoResult($"Could not get response from GarlandTools. Try again later!");
+                return new ItemInfoResult($"Could not get response from GarlandTools. Try again later!\r\nError code:{ex.StatusCode}");
             }
             catch(JsonException ex)
             {

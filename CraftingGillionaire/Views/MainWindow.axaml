@@ -341,6 +341,7 @@
 			  ItemsSource="{Binding}"
 			  CanUserReorderColumns="True"
 			  CanUserResizeColumns="True"
+        ClipboardCopyMode="None"
 			  IsReadOnly="True">
         <DataGrid.Columns>
           <DataGridTextColumn Header="Item name"
@@ -461,7 +462,7 @@
 					   FontSize="10"
 					   VerticalAlignment="Bottom"
 					   HorizontalAlignment="Left"
-					   >Version: Beta 5</Label>
+					   >Version: Beta 6</Label>
         <Label Grid.Column="2"
 					   FontSize="10"
 					   VerticalAlignment="Bottom"
@@ -523,7 +524,7 @@
                      Grid.Row="0"
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center"
-						   >Select filters:</Label>
+						    >Select filters:</Label>
                 <ListBox Grid.Column="1"
                      Grid.Row="1"
                      SelectionMode="Multiple, Toggle"
@@ -550,7 +551,7 @@
                      Grid.Row="0"
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center"
-						   >Select rows filter:</Label>
+						    >Select rows filter:</Label>
                 <ListBox Grid.Column="1"
                      Grid.Row="1"
                      SelectionMode="Single, Toggle"

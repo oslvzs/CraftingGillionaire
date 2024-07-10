@@ -53,25 +53,36 @@ namespace CraftingGillionaire.API.Universalis
             }
             catch (HttpRequestException ex)
             {
-                return new MarketMultipleMinPricesResult("Could not get response from Universalis. Try again later!");
+                return new MarketMultipleMinPricesResult($"Could not get response from Universalis. Try again later!\r\nError code: {ex.StatusCode}");
             }
         }
 
-        internal static async Task<MarketListingsResult> GetItemListings(int itemID, string entityName)
+        internal static async Task<MarketListingsResult> GetItemsListings(HashSet<int> itemIDs, string entityName)
         {
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             try
             {
-                HttpResponseMessage responseObject = await httpClient.GetAsync($"https://universalis.app/api/v2/{entityName}/{itemID}?fields=listings.pricePerUnit%2Clistings.quantity");
+                HttpResponseMessage responseObject = await httpClient.GetAsync($"https://universalis.app/api/v2/{entityName}/{String.Join(",", itemIDs)}?listings=10&fields=items.listings.pricePerUnit%2Citems.listings.quantity");
                 responseObject.EnsureSuccessStatusCode();
                 string responseBody = await responseObject.Content.ReadAsStringAsync();
                 ListingsResult response = JsonSerializer.Deserialize<ListingsResult>(responseBody) ?? new ListingsResult();
-                return new MarketListingsResult(response.Listings);
+                Dictionary<int, List<MarketListing>> listingsDictionary = new Dictionary<int, List<MarketListing>>();
+                if (response.ListingsDictionary != null)
+                {
+                    foreach (string itemIDString in response.ListingsDictionary.Keys)
+                    {
+                        int itemID = Int32.Parse(itemIDString);
+                        MarketListingsList listingList = response.ListingsDictionary[itemIDString];
+                        List<MarketListing> listings = listingList.MarketListings;
+                        listingsDictionary.Add(itemID, listings);
+                    }
+                }
+                return new MarketListingsResult(listingsDictionary);
             }
             catch (HttpRequestException ex)
             {
-                return new MarketListingsResult("Could not get response from Universalis. Try again later!");
+                return new MarketListingsResult($"Could not get response from Universalis. Try again later!\r\nError code: {ex.StatusCode}");
             }
         }
 
@@ -90,7 +101,7 @@ namespace CraftingGillionaire.API.Universalis
             }
             catch (HttpRequestException ex)
             {
-                return new SalesHistoryResult("Could not get response from Universalis. Try again later!");
+                return new SalesHistoryResult($"Could not get response from Universalis. Try again later!\r\nError code: {ex.StatusCode}");
             }           
         }
     }

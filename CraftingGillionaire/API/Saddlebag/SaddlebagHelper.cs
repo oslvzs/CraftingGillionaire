@@ -68,7 +68,7 @@ namespace CraftingGillionaire.API.Saddlebag
             }
             catch (HttpRequestException ex)
             {
-                return new MarketshareResponseData(new MarketshareResonseItem[] { }, $"Could not get response from SaddlebagExchange. Try again later!");
+                return new MarketshareResponseData(new MarketshareResonseItem[] { }, $"Could not get response from SaddlebagExchange. Try again later!\r\nError code: {ex.StatusCode}");
             }
             catch (JsonException ex)
             {

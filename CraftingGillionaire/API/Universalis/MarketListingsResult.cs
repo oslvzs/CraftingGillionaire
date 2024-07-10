@@ -9,9 +9,9 @@ namespace CraftingGillionaire.API.Universalis
 {
     internal class MarketListingsResult
     {
-        internal MarketListingsResult(List<MarketListing> marketListings)
+        internal MarketListingsResult(Dictionary<int, List<MarketListing>> marketListingsDictionary)
         {
-            this.MarketListings = marketListings;
+            this.MarketListingsDictionary = marketListingsDictionary;
             this.HasException = false;
             this.Exception = String.Empty;
         }
@@ -22,7 +22,7 @@ namespace CraftingGillionaire.API.Universalis
             this.Exception = exception;
         }
 
-        internal List<MarketListing> MarketListings { get; }
+        internal Dictionary<int, List<MarketListing>> MarketListingsDictionary { get; }
 
         internal bool HasException { get; }
 

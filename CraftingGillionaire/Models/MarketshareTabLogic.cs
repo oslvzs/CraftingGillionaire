@@ -10,11 +10,11 @@ using CraftingGillionaire.Models.Marketshare;
 using System.Collections.Generic;
 using DynamicData;
 using CraftingGillionaire.Models.User;
-using CraftingGillionaire.ViewModels;
+using System.Threading;
 
 namespace CraftingGillionaire.Models
 {
-    public class MarketshareTabLogic: ReactiveObject
+    public class MarketshareTabLogic : ReactiveObject
     {
         public MarketshareTabLogic(UserInfo userInfo)
         {
@@ -73,8 +73,8 @@ namespace CraftingGillionaire.Models
             {
                 if (this.SearchRequestData.RowsSelectedFilterItem != null)
                     this.FilterMarketshareInfo(this.SearchRequestData.RowsSelectedFilterItem.ID);
-                
-                this.IsSearchDataGridVisible = true;                
+
+                this.IsSearchDataGridVisible = true;
                 this.RaisePropertyChanged(nameof(this.IsSearchDataGridVisible));
             }
 
@@ -90,50 +90,72 @@ namespace CraftingGillionaire.Models
             ObservableCollection<MarketshareInfo> marketshareInfoList = new ObservableCollection<MarketshareInfo>();
             int[] filters = this.ConvertFiltersToIDs();
             MarketshareRequest request = SaddlebagHelper.CreateRequestObject(this.SearchRequestData, SortBy.PurchaseAmount, filters);
-            MarketshareResponseData responseData = await SaddlebagHelper.GetMarketshareResonseItemsAsync(request);
-            if (!String.IsNullOrEmpty(responseData.Exception))
+            int requestExceptionCount = 0;
+            MarketshareResponseData? responseData = null;
+            while (true)
             {
-                this.HasSaddlebagException = true;
-                this.SaddlebagException = responseData.Exception;
-                this.RaisePropertyChanged(nameof(this.HasSaddlebagException));
-                this.RaisePropertyChanged(nameof(this.SaddlebagException));
-                return new ObservableCollection<MarketshareInfo>();
-            }
-            else
-            {
-                CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.SearchRequestData.ServerName);
-                foreach (MarketshareResonseItem responseItem in responseData.ResonseItems)
+                responseData = await SaddlebagHelper.GetMarketshareResonseItemsAsync(request);
+                if (!String.IsNullOrEmpty(responseData.Exception))
                 {
-                    int itemID = Int32.Parse(responseItem.ItemID);
-                    ItemInfoResult itemInfoResult = await GarlandToolsHelper.GetItemResponse(itemID);
+                    if (requestExceptionCount > 5)
+                    {
+                        this.HasSaddlebagException = true;
+                        this.SaddlebagException = responseData.Exception;
+                        this.RaisePropertyChanged(nameof(this.HasSaddlebagException));
+                        this.RaisePropertyChanged(nameof(this.SaddlebagException));
+                        return new ObservableCollection<MarketshareInfo>();
+                    }
+
+                    requestExceptionCount++;
+                    Thread.Sleep(2000);
+                }
+                else
+                    break;
+            }
+
+            CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.SearchRequestData.ServerName);
+            foreach (MarketshareResonseItem responseItem in responseData.ResonseItems)
+            {
+                int itemID = Int32.Parse(responseItem.ItemID);
+                int itemInfoExceptionCount = 0;
+                ItemInfoResult? itemInfoResult = null;
+                while (true)
+                {
+                    itemInfoResult = await GarlandToolsHelper.GetItemResponse(itemID);
                     if (itemInfoResult.HasException)
                     {
-                        this.HasGarlandToolsException = true;
-                        this.GarlandToosException = itemInfoResult.Exception;
+                        if (itemInfoExceptionCount > 5)
+                        {
+                            this.HasGarlandToolsException = true;
+                            this.GarlandToosException = itemInfoResult.Exception;
 
-                        this.RaisePropertyChanged(nameof(this.HasGarlandToolsException));
-                        this.RaisePropertyChanged(nameof(this.GarlandToosException));
-                        break;
+                            this.RaisePropertyChanged(nameof(this.HasGarlandToolsException));
+                            this.RaisePropertyChanged(nameof(this.GarlandToosException));
+                            return new ObservableCollection<MarketshareInfo>();
+                        }
+
+                        itemInfoExceptionCount++;
+                        Thread.Sleep(2000);
                     }
                     else
-                    {
-                        MarketshareInfo marketshareInfo = new MarketshareInfo()
-                        {
-                            ItemID = itemID,
-                            ItemName = responseItem.Name,
-                            AveragePrice = responseItem.AveragePrice,
-                            MarketValue = responseItem.MarketValue,
-                            MinPrice = responseItem.MinPrice,
-                            PercentChange = responseItem.PercentChange,
-                            QuantitySold = responseItem.QuantitySold,
-                            SalesAmount = responseItem.PurchaseAmount,
-                            State = responseItem.State,
-                            URL = responseItem.URL,
-                            TreeRootNode = await craftingAnalyzerItemBuilder.BuildCraftingTree(itemInfoResult.ItemResponse)
-                        };
-                        marketshareInfoList.Add(marketshareInfo);
-                    }
+                        break;
                 }
+
+                MarketshareInfo marketshareInfo = new MarketshareInfo()
+                {
+                    ItemID = itemID,
+                    ItemName = responseItem.Name,
+                    AveragePrice = responseItem.AveragePrice,
+                    MarketValue = responseItem.MarketValue,
+                    MinPrice = responseItem.MinPrice,
+                    PercentChange = responseItem.PercentChange,
+                    QuantitySold = responseItem.QuantitySold,
+                    SalesAmount = responseItem.PurchaseAmount,
+                    State = responseItem.State,
+                    URL = responseItem.URL,
+                    TreeRootNode = await craftingAnalyzerItemBuilder.BuildCraftingTree(itemInfoResult.ItemResponse)
+                };
+                marketshareInfoList.Add(marketshareInfo);
             }
 
             return marketshareInfoList;

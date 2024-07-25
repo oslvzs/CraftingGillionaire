@@ -10,7 +10,7 @@ namespace CraftingGillionaire.Models
 
 		public int MarketValue { get; set; }
 
-		public int MinPrice { get; set; }
+		public int Revenue { get; set; }
 
 		public string ItemName { get; set; }
 

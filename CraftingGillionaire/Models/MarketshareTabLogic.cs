@@ -147,7 +147,7 @@ namespace CraftingGillionaire.Models
                     ItemName = responseItem.Name,
                     AveragePrice = responseItem.AveragePrice,
                     MarketValue = responseItem.MarketValue,
-                    MinPrice = responseItem.MinPrice,
+                    Revenue = responseItem.AveragePrice * responseItem.QuantitySold,
                     PercentChange = responseItem.PercentChange,
                     QuantitySold = responseItem.QuantitySold,
                     SalesAmount = responseItem.PurchaseAmount,

@@ -347,8 +347,8 @@
           <DataGridTextColumn Header="Item name"
 										Binding="{Binding ItemName}"
 										Width="2*" />
-          <DataGridTextColumn Header="Min price"
-										Binding="{Binding MinPrice}"
+          <DataGridTextColumn Header="Revenue"
+										Binding="{Binding Revenue}"
 										Width="1*" />
           <DataGridTextColumn Header="Average price"
 										Binding="{Binding AveragePrice}"
@@ -462,7 +462,7 @@
 					   FontSize="10"
 					   VerticalAlignment="Bottom"
 					   HorizontalAlignment="Left"
-					   >Version: Beta 6</Label>
+					   >Version: Beta 7</Label>
         <Label Grid.Column="2"
 					   FontSize="10"
 					   VerticalAlignment="Bottom"

@@ -6,10 +6,10 @@ namespace CraftingGillionaire.API.GarlandTools.API
     public class ItemInfo
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [JsonPropertyName("id")]
         public int ID { get; set; }
@@ -48,15 +48,15 @@ namespace CraftingGillionaire.API.GarlandTools.API
         public int Repair { get; set; }
 
         [JsonPropertyName("icon")]
-        public object Icon { get; set; }
+        public object? Icon { get; set; }
 
         [JsonPropertyName("craft")]
-        public List<CraftInfo> CraftsList { get; set; }
+        public List<CraftInfo>? CraftsList { get; set; }
 
         [JsonPropertyName("furniture")]
         public int IsFurniture { get; set; }
 
         [JsonPropertyName("models")]
-        public List<string> Models { get; set; }
+        public List<string>? Models { get; set; }
     }
 }

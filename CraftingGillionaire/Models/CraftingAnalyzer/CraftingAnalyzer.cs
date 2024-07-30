@@ -25,69 +25,79 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
         private string DataCenterName { get; }
 
-        internal async Task<CraftingTreeRootNode> BuildCraftingTree(ItemResponse response)
+        internal async Task<CraftingTreeRootNode> BuildCraftingTree(ItemResponse? response)
         {
+            if(response == null)
+                throw new ArgumentNullException(nameof(response));
+            if(response.ItemInfo == null)
+                throw new ArgumentNullException(nameof(response.ItemInfo));
+
             int itemID = response.ItemInfo.ID;
-            string itemName = response.ItemInfo.Name;
+            string itemName = response.ItemInfo.Name ?? String.Empty;
             bool isCraftable = response.ItemInfo.CraftsList != null && response.ItemInfo.CraftsList.Count > 0;
             NodeItemInfo itemInfo = new NodeItemInfo(itemID, itemName, isCraftable);
             CraftingTreeRootNode rootNode = new CraftingTreeRootNode(itemInfo);
             rootNode.ServerName = this.ServerName;
             if (isCraftable)
             {
-                CraftInfo craftInfo = response.ItemInfo.CraftsList.First();
-                rootNode.JobInfo = this.GetJobInfo(craftInfo);
-
-                List<CraftingTreeNode> childrenNodes = new List<CraftingTreeNode>();
-                foreach (RecipePart recipePart in craftInfo.RecipePartsList)
+                CraftInfo? craftInfo = response.ItemInfo?.CraftsList?.FirstOrDefault();
+                if (craftInfo != null)
                 {
-                    CraftingTreeNode childNode = await this.BuildChildNode(response.IngredientsList, recipePart);
-                    childrenNodes.Add(childNode);
-                    if (childNode.HasException)
-                    {
-                        rootNode.HasException = true;
-                        rootNode.Exception = childNode.Exception;
-                        return rootNode;
-                    }
-                }
-                rootNode.ChildrenNodes = childrenNodes;
+                    rootNode.JobInfo = this.GetJobInfo(craftInfo);
 
+                    List<CraftingTreeNode> childrenNodes = new List<CraftingTreeNode>();
+                    foreach (RecipePart recipePart in craftInfo.RecipePartsList ?? new List<RecipePart>())
+                    {
+                        CraftingTreeNode childNode = await this.BuildChildNode(response.IngredientsList, recipePart);
+                        childrenNodes.Add(childNode);
+                        if (childNode.HasException)
+                        {
+                            rootNode.HasException = true;
+                            rootNode.Exception = childNode.Exception ?? String.Empty;
+                            return rootNode;
+                        }
+                    }
+                    rootNode.ChildrenNodes = childrenNodes;
+                }
             }
 
-            rootNode.Ingredients = response.IngredientsList;
+            rootNode.Ingredients = response.IngredientsList ?? new List<IngredientInfo>();
             return rootNode;
         }
 
-        internal async Task<CraftingTreeNode> BuildChildNode(List<IngredientInfo> allIngredientsList, RecipePart recipePart)
+        internal async Task<CraftingTreeNode> BuildChildNode(List<IngredientInfo>? allIngredientsList, RecipePart recipePart)
         {
             int nodeItemID = recipePart.ID;
             int amount = recipePart.Amount;
             string nodeItemName;
-            IngredientInfo? ingredientInfo = allIngredientsList.FirstOrDefault(x => x.ID == nodeItemID);
+            IngredientInfo? ingredientInfo = allIngredientsList?.FirstOrDefault(x => x.ID == nodeItemID);
             if (ingredientInfo != null)
             {
                 bool isCraftable = ingredientInfo.CraftsList != null && ingredientInfo.CraftsList.Count > 0;
-                nodeItemName = ingredientInfo.Name;
+                nodeItemName = ingredientInfo.Name ?? String.Empty;
                 NodeItemInfo nodeItemInfo = new NodeItemInfo(nodeItemID, nodeItemName, isCraftable);
                 CraftingTreeNode treeNode = new CraftingTreeNode(nodeItemInfo, amount);
 
                 if (isCraftable)
                 {                                   
-                    CraftInfo craftInfo = ingredientInfo.CraftsList.First();
-                    treeNode.JobInfo = this.GetJobInfo(craftInfo);
-                    List<CraftingTreeNode> childrenNodes = new List<CraftingTreeNode>();
-                    foreach (RecipePart innerRecipePart in craftInfo.RecipePartsList)
+                    CraftInfo? craftInfo = ingredientInfo.CraftsList?.FirstOrDefault();
+                    if (craftInfo != null)
                     {
-                        CraftingTreeNode childNode = await this.BuildChildNode(allIngredientsList, innerRecipePart);
-                        childrenNodes.Add(childNode);
-                        if (childNode.HasException)
+                        treeNode.JobInfo = this.GetJobInfo(craftInfo);
+                        List<CraftingTreeNode> childrenNodes = new List<CraftingTreeNode>();
+                        foreach (RecipePart innerRecipePart in craftInfo.RecipePartsList ?? new List<RecipePart>())
                         {
-                            treeNode.HasException = true;
-                            treeNode.Exception = childNode.Exception;
-                            return treeNode;
+                            CraftingTreeNode childNode = await this.BuildChildNode(allIngredientsList, innerRecipePart);
+                            childrenNodes.Add(childNode);
+                            if (childNode.HasException)
+                            {
+                                treeNode.HasException = true;
+                                treeNode.Exception = childNode.Exception;
+                                return treeNode;
+                            }
                         }
+                        treeNode.ChildrenNodes = childrenNodes;
                     }
-                    treeNode.ChildrenNodes = childrenNodes;
                 }
 
                 return treeNode;
@@ -97,19 +107,24 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
                 ItemNameInfo itemNameInfo = await ApplicationCache.GetItemName(nodeItemID);
                 if (itemNameInfo.HasException)
                 {
-                    return new CraftingTreeNode(itemNameInfo.Exception);
+                    return new CraftingTreeNode(itemNameInfo.Exception ?? String.Empty);
                 }
                 else
                 {
-                    nodeItemName = itemNameInfo.ItemName;
+                    nodeItemName = itemNameInfo.ItemName ?? String.Empty;
                     NodeItemInfo nodeItemInfo = new NodeItemInfo(nodeItemID, nodeItemName, false);
                     return new CraftingTreeNode(nodeItemInfo, amount);
                 }
             }
         }
 
-        internal async Task FillTreeCosts(CraftingTreeRootNode rootNode, int quantitySold)
+        internal async Task FillTreeCosts(CraftingTreeRootNode? rootNode, int quantitySold)
         {
+            if(rootNode == null)
+                throw new ArgumentNullException(nameof(rootNode));
+            if (rootNode.ItemInfo == null)
+                throw new ArgumentNullException(nameof(rootNode.ItemInfo));
+
             rootNode.HasException = false;
             rootNode.Exception = String.Empty;
 
@@ -117,11 +132,13 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             {
                 rootNode.ItemInfo.ItemID
             };
-            if (rootNode.ItemInfo.IsCraftable)
+            if (rootNode.ItemInfo.IsCraftable && rootNode.ChildrenNodes != null && rootNode.ChildrenNodes.Count > 0)
             {
                 foreach(CraftingTreeNode innerNode in rootNode.ChildrenNodes)
                 {
-                    itemIDs.Add(innerNode.ItemInfo.ItemID);
+                    int? itemID = innerNode.ItemInfo?.ItemID;
+                    if (itemID != null)
+                        itemIDs.Add(itemID.Value);
                     this.FillHashset(innerNode, itemIDs);
                 }
             }
@@ -146,7 +163,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
                     break;
             }
 
-            Dictionary<int, int> minPricesDictionary = multipleMinPricesResult.MinPricesDictionary;
+            Dictionary<int, int> minPricesDictionary = multipleMinPricesResult?.MinPricesDictionary ?? new Dictionary<int, int>();
             int itemMarketboardMinPriceExceptionCounter = 0;
             MarketMinPriceResult? itemMarketboardMinPriceResult = null;
             while (true)
@@ -188,14 +205,14 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             }
 
             int recipeCosts;
-            if (rootNode.ItemInfo.IsCraftable)
+            if (rootNode.ItemInfo.IsCraftable && rootNode.ChildrenNodes != null && rootNode.ChildrenNodes.Count > 0)
             {
                 foreach (CraftingTreeNode treeNode in rootNode.ChildrenNodes)
                 {
                     await this.FillNodeCosts(treeNode, rootNode.Ingredients, minPricesDictionary, marketListingsResult.MarketListingsDictionary);
                 }
 
-                recipeCosts = rootNode.ChildrenNodes.Sum(x => x.CostsInfo.TotalCosts);
+                recipeCosts = rootNode.ChildrenNodes.Sum(x => x.CostsInfo?.TotalCosts ?? 0);
             }
             else
             {
@@ -205,12 +222,21 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             rootNode.ProfitInfo = new CraftingTreeProfitInfo(recipeCosts, itemMarketboardMinPriceResult.MinPrice, quantitySold);
         }
 
-        private async Task FillNodeCosts(CraftingTreeNode node, List<IngredientInfo> allIngredients, Dictionary<int, int> minPricesDictionary, Dictionary<int, List<MarketListing>> marketListingsDictionary)
+        private async Task FillNodeCosts(CraftingTreeNode node, List<IngredientInfo>? allIngredients, Dictionary<int, int>? minPricesDictionary, Dictionary<int, List<MarketListing>>? marketListingsDictionary)
         {
+            if(node is null)
+                throw new ArgumentNullException(nameof(node));
+            if (allIngredients == null)
+                throw new ArgumentNullException(nameof(node));
+            if (minPricesDictionary == null)
+                throw new ArgumentNullException(nameof(minPricesDictionary));
+            if(marketListingsDictionary == null)
+                throw new ArgumentNullException(nameof(marketListingsDictionary));
+
             node.CostsInfo = new NodeCostsInfo();
-            if (node.ItemInfo.IsCraftable)
+            if (node.ItemInfo?.IsCraftable ?? false)
             {
-                foreach (CraftingTreeNode childNode in node.ChildrenNodes)
+                foreach (CraftingTreeNode childNode in node.ChildrenNodes ?? new List<CraftingTreeNode>())
                 {
                     await this.FillNodeCosts(childNode, allIngredients, minPricesDictionary, marketListingsDictionary);
                     if (childNode.HasException)
@@ -221,12 +247,13 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
                     }
                 }
 
-
-                node.CostsInfo.CraftingCosts = node.ChildrenNodes.Sum(x => x.CostsInfo.TotalCosts);
+                if(node.ChildrenNodes != null)
+                    node.CostsInfo.CraftingCosts = node.ChildrenNodes.Sum(x => x.CostsInfo?.TotalCosts ?? 0);
             }
-            
-            node.CostsInfo.MarketboardCosts = minPricesDictionary[node.ItemInfo.ItemID];
-            IngredientInfo? ingredientInfo = allIngredients.FirstOrDefault(x => x.ID == node.ItemInfo.ItemID);
+
+            int itemID = node.ItemInfo?.ItemID ?? 0;
+            node.CostsInfo.MarketboardCosts = minPricesDictionary[itemID];
+            IngredientInfo? ingredientInfo = allIngredients.FirstOrDefault(x => x.ID == itemID);
             if (ingredientInfo != null && ingredientInfo.Vendors != null && ingredientInfo.Vendors.Count > 0 && ingredientInfo.Price > 0)
             {
                 node.CostsInfo.VendorCosts = ingredientInfo.Price;
@@ -236,7 +263,7 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
             if (node.CostsInfo.IsMarketboardCheaper)
             {
-                List<MarketListing> cheaperListings = marketListingsDictionary[node.ItemInfo.ItemID].Where(x => x.PricePerUnit <= node.CostsInfo.MinCosts).ToList();
+                List<MarketListing> cheaperListings = marketListingsDictionary[itemID].Where(x => x.PricePerUnit <= node.CostsInfo.MinCosts).ToList();
                 if (cheaperListings.Count > 0)
                     node.CostsInfo.MarketboardCheaperAmount = cheaperListings.Sum(x => x.Quantity);
             }
@@ -246,6 +273,11 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
         private void FindNodeMinPrice(CraftingTreeNode node)
         {
+            if (node == null)
+                throw new ArgumentNullException(nameof(node));
+            if(node.CostsInfo == null)
+                throw new ArgumentNullException(nameof(node.CostsInfo));
+
             if (node.CostsInfo.CraftingCosts != Int32.MaxValue && node.CostsInfo.CraftingCosts < node.CostsInfo.MarketboardCosts && node.CostsInfo.CraftingCosts < node.CostsInfo.VendorCosts)
                 node.CostsInfo.IsCraftingCheaper = true;
             if (node.CostsInfo.MarketboardCosts != Int32.MaxValue && node.CostsInfo.MarketboardCosts < node.CostsInfo.CraftingCosts && node.CostsInfo.MarketboardCosts < node.CostsInfo.VendorCosts)
@@ -271,8 +303,11 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             }
         }
 
-        private NodeJobInfo GetJobInfo(CraftInfo craftInfo)
+        private NodeJobInfo GetJobInfo(CraftInfo? craftInfo)
         {
+            if(craftInfo == null)
+                throw new ArgumentNullException(nameof(craftInfo));
+
             string jobName = "Other";
             int jobLevel = craftInfo.JobLevel;
             int jobID = craftInfo.JobID;
@@ -294,11 +329,18 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
 
         private void FillHashset(CraftingTreeNode node, HashSet<int> itemIDs)
         {
-            if (node.ItemInfo.IsCraftable)
+            if(node == null)
+                throw new ArgumentNullException(nameof(node));
+            if (node.ItemInfo == null)
+                throw new ArgumentNullException(nameof(node.ItemInfo));
+
+            if (node.ItemInfo.IsCraftable && node.ChildrenNodes != null && node.ChildrenNodes.Count > 0)
             {
                 foreach (CraftingTreeNode treeNode in node.ChildrenNodes)
                 {
-                    itemIDs.Add(treeNode.ItemInfo.ItemID);
+                    int? itemID = treeNode.ItemInfo?.ItemID;
+                    if(itemID != null)
+                        itemIDs.Add(itemID.Value);
                     this.FillHashset(treeNode, itemIDs);
                 }
             }

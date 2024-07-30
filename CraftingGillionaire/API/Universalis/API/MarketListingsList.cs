@@ -10,6 +10,6 @@ namespace CraftingGillionaire.API.Universalis.API
     public class MarketListingsList
     {
         [JsonPropertyName("listings")]
-        public List<MarketListing> MarketListings { get; set; }
+        public List<MarketListing>? MarketListings { get; set; }
     }
 }

@@ -9,8 +9,11 @@ namespace CraftingGillionaire.API.Saddlebag
 {
 	public class MarketshareResponseData
 	{
-		public MarketshareResponseData(MarketshareResonseItem[] resonseItems, string exception) 
+		public MarketshareResponseData(MarketshareResonseItem[]? resonseItems, string exception) 
 		{ 
+			if(resonseItems == null)
+				throw new ArgumentNullException(nameof(resonseItems));
+
 			this.ResonseItems = resonseItems;
 			this.Exception = exception;
 		}

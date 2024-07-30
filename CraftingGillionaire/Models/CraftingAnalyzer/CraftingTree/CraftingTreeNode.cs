@@ -18,19 +18,19 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             this.Exception = exception;
         }
 
-        public NodeItemInfo ItemInfo { get; }
+        public NodeItemInfo? ItemInfo { get; }
 
-        public NodeJobInfo JobInfo { get; set; }
+        public NodeJobInfo? JobInfo { get; set; }
 
-        public List<CraftingTreeNode> ChildrenNodes { get; set; }
+        public List<CraftingTreeNode>? ChildrenNodes { get; set; }
 
-        public NodeCostsInfo CostsInfo { get; set; }
+        public NodeCostsInfo? CostsInfo { get; set; }
 
         public int Amount { get; set; }
 
         public bool HasException { get; set; }
 
-        public string Exception { get; set; }
+        public string? Exception { get; set; }
 
         public bool ShowLowLevelText
         {
@@ -44,7 +44,10 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
         {
             get
             {
-                return this.CostsInfo.IsMarketboardCheaper && this.CostsInfo.CraftingCosts != Int32.MaxValue && this.CostsInfo.CraftingCosts > this.CostsInfo.MarketboardCosts;
+                if (this.CostsInfo != null)
+                    return this.CostsInfo.IsMarketboardCheaper && this.CostsInfo.CraftingCosts != Int32.MaxValue && this.CostsInfo.CraftingCosts > this.CostsInfo.MarketboardCosts;
+                else 
+                    return false;
             }
         }
 

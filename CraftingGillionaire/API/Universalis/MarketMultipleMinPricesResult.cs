@@ -18,10 +18,10 @@ namespace CraftingGillionaire.API.Universalis
             this.Exception = exception;
         }
 
-        internal Dictionary<int, int> MinPricesDictionary { get; }
+        internal Dictionary<int, int>? MinPricesDictionary { get; }
 
         internal bool HasException { get; }
 
-        internal string Exception { get; }
+        internal string? Exception { get; }
     }
 }

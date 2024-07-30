@@ -10,9 +10,9 @@ namespace CraftingGillionaire.Models
 
 		public int MarketValue { get; set; }
 
-		public int MinPrice { get; set; }
+		public int Revenue { get; set; }
 
-		public string ItemName { get; set; }
+		public string? ItemName { get; set; }
 
 		public double PercentChange { get; set; }
 
@@ -20,11 +20,11 @@ namespace CraftingGillionaire.Models
 
 		public int SalesAmount { get; set; }
 
-		public string State { get; set; }
+		public string? State { get; set; }
 
-		public string URL { get; set; }
+		public string? URL { get; set; }
 
-		public CraftingTreeRootNode TreeRootNode { get; set; }
+		public CraftingTreeRootNode? TreeRootNode { get; set; }
 
         public void OnLinkClick(string url)
         {

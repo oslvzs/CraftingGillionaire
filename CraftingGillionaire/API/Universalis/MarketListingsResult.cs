@@ -22,10 +22,10 @@ namespace CraftingGillionaire.API.Universalis
             this.Exception = exception;
         }
 
-        internal Dictionary<int, List<MarketListing>> MarketListingsDictionary { get; }
+        internal Dictionary<int, List<MarketListing>>? MarketListingsDictionary { get; }
 
         internal bool HasException { get; }
 
-        internal string Exception { get; }
+        internal string? Exception { get; }
     }
 }

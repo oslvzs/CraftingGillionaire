@@ -16,9 +16,9 @@ namespace CraftingGillionaire.Models
             this.RowsSelectedFilterItem = this.RowsFilterItems.First();
         }
 
-        public MarketshareTabLogic TabLogic { get; }
+        public MarketshareTabLogic? TabLogic { get; }
 
-		public string ServerName { get; set; }
+		public string? ServerName { get; set; }
 
 		public int TimePeriod { get; set; }
 		public string TimePeriodString
@@ -184,6 +184,9 @@ namespace CraftingGillionaire.Models
 
         public async void OnMarketshareSearchClick()
         {
+            if (this.TabLogic == null)
+                throw new NullReferenceException(nameof(this.TabLogic));
+
             await this.TabLogic.OnMarketshareSearchClick();
         }
     }

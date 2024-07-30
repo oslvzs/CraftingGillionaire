@@ -22,10 +22,10 @@ namespace CraftingGillionaire.API.GarlandTools
             this.Exception = exception;
         }
 
-        internal ItemResponse ItemResponse { get; }
+        internal ItemResponse? ItemResponse { get; }
 
         internal bool HasException { get; }
 
-        internal string Exception { get; }
+        internal string? Exception { get; }
     }
 }

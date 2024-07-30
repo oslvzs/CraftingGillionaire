@@ -24,7 +24,7 @@ namespace CraftingGillionaire.API.Universalis
             }
             catch(HttpRequestException ex)
             {
-                return new MarketMinPriceResult("Could not get response from Universalis. Try again later!");
+                return new MarketMinPriceResult($"Could not get response from Universalis. Try again later!\r\nError code:{ex.StatusCode}");
             }
         }
 
@@ -74,7 +74,7 @@ namespace CraftingGillionaire.API.Universalis
                     {
                         int itemID = Int32.Parse(itemIDString);
                         MarketListingsList listingList = response.ListingsDictionary[itemIDString];
-                        List<MarketListing> listings = listingList.MarketListings;
+                        List<MarketListing> listings = listingList.MarketListings ?? new List<MarketListing>();
                         listingsDictionary.Add(itemID, listings);
                     }
                 }
@@ -88,6 +88,9 @@ namespace CraftingGillionaire.API.Universalis
 
         internal static async Task<SalesHistoryResult> GetSalesHistory(string serverName, int itemID, int hours)
         {
+            if(String.IsNullOrWhiteSpace(serverName))
+                throw new ArgumentNullException(nameof(serverName));
+
             long seconds = hours * 60 * 60;
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -97,7 +100,7 @@ namespace CraftingGillionaire.API.Universalis
                 responseObject.EnsureSuccessStatusCode();
                 string responseBody = await responseObject.Content.ReadAsStringAsync();
                 SalesHistoryResponse response = JsonSerializer.Deserialize<SalesHistoryResponse>(responseBody) ?? new SalesHistoryResponse();
-                return new SalesHistoryResult(response.Entries);
+                return new SalesHistoryResult(response.Entries ?? new List<SaleEntry>());
             }
             catch (HttpRequestException ex)
             {

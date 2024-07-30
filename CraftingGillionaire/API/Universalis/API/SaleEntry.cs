@@ -19,7 +19,7 @@ namespace CraftingGillionaire.API.Universalis.API
         public int Quantity { get; set; }
 
         [JsonPropertyName("buyerName")]
-        public string BuyerName { get; set; }
+        public string? BuyerName { get; set; }
 
         [JsonPropertyName("onMannequin")]
         public bool OnMannequin { get; set; }

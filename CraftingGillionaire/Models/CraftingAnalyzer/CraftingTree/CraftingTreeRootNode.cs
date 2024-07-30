@@ -19,21 +19,21 @@ namespace CraftingGillionaire.Models.CraftingAnalyzer
             this.HasException = true;
         }
 
-        public string ServerName { get; set; }
+        public string? ServerName { get; set; }
 
-        public NodeItemInfo ItemInfo { get; }
+        public NodeItemInfo? ItemInfo { get; }
 
-        public NodeJobInfo JobInfo { get; set; }
+        public NodeJobInfo? JobInfo { get; set; }
 
-        public List<CraftingTreeNode> ChildrenNodes { get; set; }
+        public List<CraftingTreeNode>? ChildrenNodes { get; set; }
 
-        public CraftingTreeProfitInfo ProfitInfo { get; set; }
+        public CraftingTreeProfitInfo? ProfitInfo { get; set; }
 
         public bool HasException { get; set; }
 
-        public string Exception { get; set; }
+        public string? Exception { get; set; }
 
-        internal List<IngredientInfo> Ingredients { get; set; }
+        internal List<IngredientInfo>? Ingredients { get; set; }
 
         public bool ShowLowLevelText
         {

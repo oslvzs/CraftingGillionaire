@@ -64,13 +64,13 @@ namespace CraftingGillionaire.API.Saddlebag
                 string responseBody = await responseObject.Content.ReadAsStringAsync();
                 MarketshareResponse response = JsonSerializer.Deserialize<MarketshareResponse>(responseBody) ?? new MarketshareResponse();
 
-                return new MarketshareResponseData(response.Data, response.Exception);
+                return new MarketshareResponseData(response.Data, response.Exception ?? String.Empty);
             }
             catch (HttpRequestException ex)
             {
                 return new MarketshareResponseData(new MarketshareResonseItem[] { }, $"Could not get response from SaddlebagExchange. Try again later!\r\nError code: {ex.StatusCode}");
             }
-            catch (JsonException ex)
+            catch (JsonException)
             {
                 return new MarketshareResponseData(new MarketshareResonseItem[] { }, $"Could not parse answer from SaddlebagExchange.");
             }

@@ -347,8 +347,8 @@
           <DataGridTextColumn Header="Item name"
 										Binding="{Binding ItemName}"
 										Width="2*" />
-          <DataGridTextColumn Header="Min price"
-										Binding="{Binding MinPrice}"
+          <DataGridTextColumn Header="Revenue"
+										Binding="{Binding Revenue}"
 										Width="1*" />
           <DataGridTextColumn Header="Average price"
 										Binding="{Binding AveragePrice}"

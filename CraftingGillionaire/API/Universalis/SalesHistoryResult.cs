@@ -21,10 +21,10 @@ namespace CraftingGillionaire.API.Universalis
             this.Exception = exception;
         }
 
-        internal List<SaleEntry> SaleEntries { get; }
+        internal List<SaleEntry>? SaleEntries { get; }
 
         internal bool HasException { get; }
 
-        internal string Exception { get; }
+        internal string? Exception { get; }
     }
 }

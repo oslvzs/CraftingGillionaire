@@ -8,16 +8,16 @@ namespace CraftingGillionaire.API.GarlandTools.API
         public int i { get; set; }
 
         [JsonPropertyName("n")]
-        public string n { get; set; }
+        public string? n { get; set; }
 
         [JsonPropertyName("l")]
         public int l { get; set; }
 
         [JsonPropertyName("c")]
-        public object c { get; set; }
+        public object? c { get; set; }
 
         [JsonPropertyName("t")]
-        public object t { get; set; }
+        public object? t { get; set; }
 
         [JsonPropertyName("z")]
         public int? z { get; set; }

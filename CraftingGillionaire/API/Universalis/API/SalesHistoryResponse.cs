@@ -19,7 +19,7 @@ namespace CraftingGillionaire.API.Universalis.API
         public long LastUploadTime { get; set; }
 
         [JsonPropertyName("entries")]
-        public List<SaleEntry> Entries { get; set; }
+        public List<SaleEntry>? Entries { get; set; }
 
         [JsonPropertyName("regularSaleVelocity")]
         public double RegularSaleVelocity { get; set; }
@@ -31,6 +31,6 @@ namespace CraftingGillionaire.API.Universalis.API
         public double HQSaleVelocity { get; set; }
 
         [JsonPropertyName("worldName")]
-        public string WorldName { get; set; }
+        public string? WorldName { get; set; }
     }
 }

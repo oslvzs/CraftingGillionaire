@@ -8,7 +8,7 @@ namespace CraftingGillionaire.API.Saddlebag.API
         public int AveragePrice { get; set; }
 
         [JsonPropertyName("itemID")]
-        public string ItemID { get; set; }
+        public string? ItemID { get; set; }
 
         [JsonPropertyName("marketValue")]
         public int MarketValue { get; set; }
@@ -20,10 +20,10 @@ namespace CraftingGillionaire.API.Saddlebag.API
         public int MinPrice { get; set; }
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("npc_vendor_info")]
-        public string NPCVendorInfo { get; set; }
+        public string? NPCVendorInfo { get; set; }
 
         [JsonPropertyName("percentChange")]
         public double PercentChange { get; set; }
@@ -35,9 +35,9 @@ namespace CraftingGillionaire.API.Saddlebag.API
         public int QuantitySold { get; set; }
 
         [JsonPropertyName("state")]
-        public string State { get; set; }
+        public string? State { get; set; }
 
         [JsonPropertyName("url")]
-        public string URL { get; set; }
+        public string? URL { get; set; }
     }
 }

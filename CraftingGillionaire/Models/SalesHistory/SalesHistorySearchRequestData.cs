@@ -10,11 +10,11 @@ namespace CraftingGillionaire.Models
             this.TabLogic = tabLogic;
         }
 
-        public SalesHistoryTabLogic TabLogic { get; }
+        public SalesHistoryTabLogic? TabLogic { get; }
 
-        public string ServerName { get; set; }
+        public string? ServerName { get; set; }
 
-        public string ItemName { get; set; }
+        public string? ItemName { get; set; }
 
         public int TimePeriod { get; set; }
         public string TimePeriodString
@@ -32,6 +32,9 @@ namespace CraftingGillionaire.Models
 
         public async void OnSalesHistorySearchClick()
         {
+            if(this.TabLogic == null)
+                throw new NullReferenceException(nameof(this.TabLogic));
+
             await this.TabLogic.OnSalesHistorySearchClick();
         }
     }

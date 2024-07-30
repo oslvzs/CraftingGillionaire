@@ -5,12 +5,12 @@ namespace CraftingGillionaire.API.GarlandTools.API
     public class Partial
     {
         [JsonPropertyName("type")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
         [JsonPropertyName("id")]
-        public string ID { get; set; }
+        public string? ID { get; set; }
 
         [JsonPropertyName("obj")]
-        public Obj Object { get; set; }
+        public Obj? Object { get; set; }
     }
 }

@@ -17,6 +17,9 @@ namespace CraftingGillionaire.API.XIVAPI
     {
         internal static async Task<ItemIDResult> GetItemNameByID(string itemName)
         {
+            if(String.IsNullOrWhiteSpace(itemName))
+                throw new ArgumentNullException(nameof(itemName));
+
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             try
@@ -26,13 +29,15 @@ namespace CraftingGillionaire.API.XIVAPI
                 responseObject.EnsureSuccessStatusCode();
                 string responseBody = await responseObject.Content.ReadAsStringAsync();
                 ItemIDResponse response = JsonSerializer.Deserialize<ItemIDResponse>(responseBody) ?? new ItemIDResponse();
+                if(response.Results == null)
+                    throw new NullReferenceException(nameof(response.Results));
                 if (response.Results.Count == 0)
                     return new ItemIDResult($"Could not find item with name \"{itemName}\"");
                 return new ItemIDResult(response.Results.First().ID);
             }
             catch (HttpRequestException ex)
             {
-                return new ItemIDResult("Could not get response from XIVAPI. Try again later!");
+                return new ItemIDResult($"Could not get response from XIVAPI. Try again later!\r\nError code:{ex.StatusCode}");
             }
         }
     }

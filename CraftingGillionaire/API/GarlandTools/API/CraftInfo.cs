@@ -33,10 +33,10 @@ namespace CraftingGillionaire.API.GarlandTools.API
         public int MaterialQualityFactor { get; set; }
 
         [JsonPropertyName("ingredients")]
-        public List<RecipePart> RecipePartsList { get; set; }
+        public List<RecipePart>? RecipePartsList { get; set; }
 
         [JsonPropertyName("complexity")]
-        public Complexity Complexity { get; set; }
+        public Complexity? Complexity { get; set; }
 
         [JsonPropertyName("hq")]
         public int CanBeHQ { get; set; }

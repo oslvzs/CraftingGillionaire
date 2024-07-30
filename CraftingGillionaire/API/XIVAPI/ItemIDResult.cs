@@ -25,6 +25,6 @@ namespace CraftingGillionaire.API.XIVAPI
 
         internal bool HasException { get; }
 
-        internal string Exception { get; }
+        internal string? Exception { get; }
     }
 }

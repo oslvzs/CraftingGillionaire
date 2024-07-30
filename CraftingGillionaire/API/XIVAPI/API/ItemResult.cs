@@ -13,21 +13,21 @@ namespace CraftingGillionaire.API.XIVAPI.API
         public int ID { get; set; }
 
         [JsonPropertyName("Icon")]
-        public string Icon { get; set; }
+        public string? Icon { get; set; }
 
         [JsonPropertyName("Name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("Url")]
-        public string Url { get; set; }
+        public string? Url { get; set; }
 
         [JsonPropertyName("UrlType")]
-        public string UrlType { get; set; }
+        public string? UrlType { get; set; }
 
         [JsonPropertyName("_")]
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
         [JsonPropertyName("_Score")]
-        public string _Score { get; set; }
+        public string? _Score { get; set; }
     }
 }

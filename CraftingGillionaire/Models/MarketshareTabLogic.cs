@@ -84,6 +84,9 @@ namespace CraftingGillionaire.Models
 
         private async Task<ObservableCollection<MarketshareInfo>> GetMarketshareInfo()
         {
+            if(this.SearchRequestData == null)
+                throw new ArgumentNullException(nameof(this.SearchRequestData));
+
             this.IsCraftingAnalyzerPreparingLabelVisible = false;
             this.RaisePropertyChanged(nameof(this.IsCraftingAnalyzerPreparingLabelVisible));
 
@@ -113,49 +116,52 @@ namespace CraftingGillionaire.Models
                     break;
             }
 
-            CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.SearchRequestData.ServerName);
+            CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.SearchRequestData.ServerName ?? String.Empty);
             foreach (MarketshareResonseItem responseItem in responseData.ResonseItems)
             {
-                int itemID = Int32.Parse(responseItem.ItemID);
-                int itemInfoExceptionCount = 0;
-                ItemInfoResult? itemInfoResult = null;
-                while (true)
+                if (!String.IsNullOrEmpty(responseItem.ItemID))
                 {
-                    itemInfoResult = await GarlandToolsHelper.GetItemResponse(itemID);
-                    if (itemInfoResult.HasException)
+                    int itemID = Int32.Parse(responseItem.ItemID);
+                    int itemInfoExceptionCount = 0;
+                    ItemInfoResult? itemInfoResult = null;
+                    while (true)
                     {
-                        if (itemInfoExceptionCount > 5)
+                        itemInfoResult = await GarlandToolsHelper.GetItemResponse(itemID);
+                        if (itemInfoResult.HasException)
                         {
-                            this.HasGarlandToolsException = true;
-                            this.GarlandToosException = itemInfoResult.Exception;
+                            if (itemInfoExceptionCount > 5)
+                            {
+                                this.HasGarlandToolsException = true;
+                                this.GarlandToosException = itemInfoResult.Exception ?? String.Empty;
 
-                            this.RaisePropertyChanged(nameof(this.HasGarlandToolsException));
-                            this.RaisePropertyChanged(nameof(this.GarlandToosException));
-                            return new ObservableCollection<MarketshareInfo>();
+                                this.RaisePropertyChanged(nameof(this.HasGarlandToolsException));
+                                this.RaisePropertyChanged(nameof(this.GarlandToosException));
+                                return new ObservableCollection<MarketshareInfo>();
+                            }
+
+                            itemInfoExceptionCount++;
+                            Thread.Sleep(2000);
                         }
-
-                        itemInfoExceptionCount++;
-                        Thread.Sleep(2000);
+                        else
+                            break;
                     }
-                    else
-                        break;
-                }
 
-                MarketshareInfo marketshareInfo = new MarketshareInfo()
-                {
-                    ItemID = itemID,
-                    ItemName = responseItem.Name,
-                    AveragePrice = responseItem.AveragePrice,
-                    MarketValue = responseItem.MarketValue,
-                    Revenue = responseItem.AveragePrice * responseItem.QuantitySold,
-                    PercentChange = responseItem.PercentChange,
-                    QuantitySold = responseItem.QuantitySold,
-                    SalesAmount = responseItem.PurchaseAmount,
-                    State = responseItem.State,
-                    URL = responseItem.URL,
-                    TreeRootNode = await craftingAnalyzerItemBuilder.BuildCraftingTree(itemInfoResult.ItemResponse)
-                };
-                marketshareInfoList.Add(marketshareInfo);
+                    MarketshareInfo marketshareInfo = new MarketshareInfo()
+                    {
+                        ItemID = itemID,
+                        ItemName = responseItem.Name,
+                        AveragePrice = responseItem.AveragePrice,
+                        MarketValue = responseItem.MarketValue,
+                        Revenue = responseItem.AveragePrice * responseItem.QuantitySold,
+                        PercentChange = responseItem.PercentChange,
+                        QuantitySold = responseItem.QuantitySold,
+                        SalesAmount = responseItem.PurchaseAmount,
+                        State = responseItem.State,
+                        URL = responseItem.URL,
+                        TreeRootNode = await craftingAnalyzerItemBuilder.BuildCraftingTree(itemInfoResult.ItemResponse)
+                    };
+                    marketshareInfoList.Add(marketshareInfo);
+                }
             }
 
             return marketshareInfoList;
@@ -171,42 +177,48 @@ namespace CraftingGillionaire.Models
 
             foreach (MarketshareInfo marketshareInfo in this.MarketshareInfos)
             {
-                if (mode == 1)
+                if (marketshareInfo.TreeRootNode != null && marketshareInfo.TreeRootNode.ItemInfo != null)
                 {
-                    if (marketshareInfo.TreeRootNode.ItemInfo.IsCraftable)
-                        result.Add(marketshareInfo);
-                }
-                else if (mode == 2)
-                {
-                    if (!marketshareInfo.TreeRootNode.ItemInfo.IsCraftable)
-                        continue;
-
-                    if (!marketshareInfo.TreeRootNode.JobInfo.UserCanCraft)
-                        continue;
-
-                    result.Add(marketshareInfo);
-                }
-                else if (mode == 3)
-                {
-                    if (!marketshareInfo.TreeRootNode.ItemInfo.IsCraftable)
-                        continue;
-
-                    if (!marketshareInfo.TreeRootNode.JobInfo.UserCanCraft)
-                        continue;
-
-                    bool areInnerNodesCraftable = true;
-
-                    foreach (CraftingTreeNode innerNode in marketshareInfo.TreeRootNode.ChildrenNodes)
+                    if (mode == 1)
                     {
-                        if (!this.CheckNodeCraftable(innerNode))
+                        if (marketshareInfo.TreeRootNode.ItemInfo.IsCraftable)
+                            result.Add(marketshareInfo);
+                    }
+                    else if (mode == 2)
+                    {
+                        if (!marketshareInfo.TreeRootNode.ItemInfo.IsCraftable)
+                            continue;
+
+                        if (marketshareInfo.TreeRootNode.JobInfo != null && !marketshareInfo.TreeRootNode.JobInfo.UserCanCraft)
+                            continue;
+
+                        result.Add(marketshareInfo);
+                    }
+                    else if (mode == 3)
+                    {
+                        if (!marketshareInfo.TreeRootNode.ItemInfo.IsCraftable)
+                            continue;
+
+                        if (marketshareInfo.TreeRootNode.JobInfo != null && !marketshareInfo.TreeRootNode.JobInfo.UserCanCraft)
+                            continue;
+
+                        bool areInnerNodesCraftable = true;
+
+                        if (marketshareInfo.TreeRootNode.ChildrenNodes != null && marketshareInfo.TreeRootNode.ChildrenNodes.Count > 0)
                         {
-                            areInnerNodesCraftable = false;
-                            break;
+                            foreach (CraftingTreeNode innerNode in marketshareInfo.TreeRootNode.ChildrenNodes)
+                            {
+                                if (!this.CheckNodeCraftable(innerNode))
+                                {
+                                    areInnerNodesCraftable = false;
+                                    break;
+                                }
+                            }
+
+                            if (areInnerNodesCraftable)
+                                result.Add(marketshareInfo);
                         }
                     }
-
-                    if (areInnerNodesCraftable)
-                        result.Add(marketshareInfo);
                 }
             }
 
@@ -217,6 +229,13 @@ namespace CraftingGillionaire.Models
 
         private bool CheckNodeCraftable(CraftingTreeNode node)
         {
+            if (node == null)
+                throw new ArgumentException(nameof(node));
+            if(node.ItemInfo == null)
+                throw new ArgumentNullException(nameof(node.ItemInfo));
+            if (node.JobInfo == null)
+                throw new ArgumentNullException(nameof(node.JobInfo));
+
             if (!node.ItemInfo.IsCraftable)
                 return true;
 
@@ -224,12 +243,15 @@ namespace CraftingGillionaire.Models
                 return false;
 
             bool areInnerNodesCraftable = true;
-            foreach (CraftingTreeNode innerNode in node.ChildrenNodes)
+            if (node.ChildrenNodes != null && node.ChildrenNodes.Count > 0)
             {
-                if (!this.CheckNodeCraftable(innerNode))
+                foreach (CraftingTreeNode innerNode in node.ChildrenNodes)
                 {
-                    areInnerNodesCraftable = false;
-                    break;
+                    if (!this.CheckNodeCraftable(innerNode))
+                    {
+                        areInnerNodesCraftable = false;
+                        break;
+                    }
                 }
             }
 
@@ -303,6 +325,13 @@ namespace CraftingGillionaire.Models
 
         public async void OnAnalyzeClick(MarketshareInfo marketshareInfo)
         {
+            if(marketshareInfo == null)
+                throw new ArgumentNullException(nameof(marketshareInfo));
+            if (marketshareInfo.TreeRootNode == null)
+                throw new NullReferenceException(nameof(marketshareInfo.TreeRootNode));
+            if (this.SearchRequestData == null)
+                throw new NullReferenceException(nameof(this.SearchRequestData));
+
             this.IsSaddlebagGridVisible = false;
             this.IsSearchButtonVisible = false;
             this.IsCraftingAnalyzerVisible = true;
@@ -319,7 +348,7 @@ namespace CraftingGillionaire.Models
             this.RaisePropertyChanged(nameof(this.HasGarlandToolsException));
             this.RaisePropertyChanged(nameof(this.HasSaddlebagException));
 
-            CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.SearchRequestData.ServerName);
+            CraftingAnalyzerItemBuilder craftingAnalyzerItemBuilder = new CraftingAnalyzerItemBuilder(this.UserInfo, this.SearchRequestData.ServerName ?? String.Empty);
             await craftingAnalyzerItemBuilder.FillTreeCosts(marketshareInfo.TreeRootNode, marketshareInfo.QuantitySold);
             this.IsCraftingAnalyzerPreparingLabelVisible = false;
             this.IsCraftingAnalyzerContentVisible = true;

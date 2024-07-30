@@ -40,6 +40,9 @@ namespace CraftingGillionaire.Models
 
         public async Task OnSalesHistorySearchClick()
         {
+            if (this.SalesHistoryRequestData == null)
+                throw new NullReferenceException(nameof(this.SalesHistoryRequestData));
+
             this.IsStartSearchHistoryLabelVisible = false;
             this.HasSalesHistoryException = false;
             this.SalesHistoryException = String.Empty;
@@ -53,11 +56,11 @@ namespace CraftingGillionaire.Models
             this.RaisePropertyChanged(nameof(this.IsSearchHistoryPanelVisible));
             this.RaisePropertyChanged(nameof(this.IsSearchHistoryPreparingPanelVisible));
 
-            ItemIDResult itemIDResult = await XIVAPIHelper.GetItemNameByID(this.SalesHistoryRequestData.ItemName);
+            ItemIDResult itemIDResult = await XIVAPIHelper.GetItemNameByID(this.SalesHistoryRequestData.ItemName ?? String.Empty);
             if (itemIDResult.HasException)
             {
                 this.HasSalesHistoryException = true;
-                this.SalesHistoryException = itemIDResult.Exception;
+                this.SalesHistoryException = itemIDResult.Exception ?? String.Empty;
                 this.IsSearchHistoryPreparingPanelVisible = false;
                 this.IsSearchHistoryPanelVisible = false;
 
@@ -68,11 +71,11 @@ namespace CraftingGillionaire.Models
             }
             else
             {
-                SalesHistoryResult result = await UniversalisHelper.GetSalesHistory(this.SalesHistoryRequestData.ServerName, itemIDResult.ID, this.SalesHistoryRequestData.TimePeriod);
+                SalesHistoryResult result = await UniversalisHelper.GetSalesHistory(this.SalesHistoryRequestData.ServerName ?? String.Empty, itemIDResult.ID, this.SalesHistoryRequestData.TimePeriod);
                 if (result.HasException)
                 {
                     this.HasSalesHistoryException = true;
-                    this.SalesHistoryException = result.Exception;
+                    this.SalesHistoryException = result.Exception ?? String.Empty;
                     this.IsSearchHistoryPreparingPanelVisible = false;
                     this.IsSearchHistoryPanelVisible = false;
 
@@ -85,13 +88,16 @@ namespace CraftingGillionaire.Models
                 {
                     this.HQSalesHistory.Clear();
                     this.NQSalesHistory.Clear();
-                    foreach (SaleEntry saleEntry in result.SaleEntries)
+                    if (result.SaleEntries != null && result.SaleEntries.Count > 0)
                     {
-                        SaleDisplayItem saleDisplayItem = new SaleDisplayItem(saleEntry);
-                        if (saleDisplayItem.IsHQ)
-                            this.HQSalesHistory.Add(saleDisplayItem);
-                        else
-                            this.NQSalesHistory.Add(saleDisplayItem);
+                        foreach (SaleEntry saleEntry in result.SaleEntries)
+                        {
+                            SaleDisplayItem saleDisplayItem = new SaleDisplayItem(saleEntry);
+                            if (saleDisplayItem.IsHQ)
+                                this.HQSalesHistory.Add(saleDisplayItem);
+                            else
+                                this.NQSalesHistory.Add(saleDisplayItem);
+                        }
                     }
 
                     this.IsNQSalesHistoryEmpty = this.NQSalesHistory.Count == 0;

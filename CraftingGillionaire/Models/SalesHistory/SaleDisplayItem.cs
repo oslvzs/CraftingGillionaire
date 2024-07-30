@@ -14,7 +14,7 @@ namespace CraftingGillionaire.Models
             this.IsHQ = saleEntry.IsHQ;
             this.PricePerUnit = saleEntry.PricePerUnit;
             this.Quantity = saleEntry.Quantity;
-            this.BuyerName = saleEntry.BuyerName;
+            this.BuyerName = saleEntry.BuyerName ?? String.Empty;
             DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(saleEntry.Timestamp);
             this.Date = dateTimeOffset.LocalDateTime;
         }

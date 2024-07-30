@@ -146,7 +146,6 @@ namespace CraftingGillionaire.Models
                             break;
                     }
 
-
                     MarketshareInfo marketshareInfo = new MarketshareInfo()
                     {
                         ItemID = itemID,

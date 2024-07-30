@@ -462,7 +462,7 @@
 					   FontSize="10"
 					   VerticalAlignment="Bottom"
 					   HorizontalAlignment="Left"
-					   >Version: Beta 6</Label>
+					   >Version: Beta 7</Label>
         <Label Grid.Column="2"
 					   FontSize="10"
 					   VerticalAlignment="Bottom"

@@ -6,6 +6,7 @@ using CraftingGillionaire.API.Universalis;
 using CraftingGillionaire.Models;
 using CraftingGillionaire.Models.User;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace CraftingGillionaire
 {
     internal static class ApplicationCache
     {
-        internal static Dictionary<int, string?> ItemNameDictionary { get; } = new Dictionary<int, string?>();
+        internal static ConcurrentDictionary<int, string?> ItemNameDictionary { get; } = new ConcurrentDictionary<int, string?>();
 
         internal static async Task<ItemNameInfo> GetItemName(int itemID)
         {
@@ -31,7 +32,7 @@ namespace CraftingGillionaire
                 else
                 {
                     itemName = itemInfoResult.ItemResponse?.ItemInfo?.Name;
-                    ItemNameDictionary.Add(itemID, itemName);
+                    ItemNameDictionary.TryAdd(itemID, itemName);
                 }
             }
 

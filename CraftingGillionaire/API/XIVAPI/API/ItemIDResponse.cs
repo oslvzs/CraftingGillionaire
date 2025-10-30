@@ -5,10 +5,7 @@ namespace CraftingGillionaire.API.XIVAPI.API
 {
     internal class ItemIDResponse
     {
-        [JsonPropertyName("Results")]
+        [JsonPropertyName("results")]
         public List<ItemResult>? Results { get; set; }
-
-        [JsonPropertyName("SpeedMs")]
-        public int SpeedMs { get; set; }
     }
 }

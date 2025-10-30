@@ -24,8 +24,9 @@ namespace CraftingGillionaire.API.XIVAPI
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             try
             {
-                string encodedName = HttpUtility.UrlEncode(itemName);
-                HttpResponseMessage responseObject = await httpClient.GetAsync($"https://xivapi.com/search?indexes=Item&string={encodedName}&string_algo=match&pretty=1");
+                string encodedName = HttpUtility.UrlEncode($"\"{itemName}\"");
+                //https://v2.xivapi.com/api/search?sheets=Item&fields=Name&query=Name=%22White%20Rectangular%20Partition%22
+                HttpResponseMessage responseObject = await httpClient.GetAsync($"https://v2.xivapi.com/api/search?sheets=Item&fields=Name&query=Name={encodedName}");
                 responseObject.EnsureSuccessStatusCode();
                 string responseBody = await responseObject.Content.ReadAsStringAsync();
                 ItemIDResponse response = JsonSerializer.Deserialize<ItemIDResponse>(responseBody) ?? new ItemIDResponse();
@@ -33,7 +34,7 @@ namespace CraftingGillionaire.API.XIVAPI
                     throw new NullReferenceException(nameof(response.Results));
                 if (response.Results.Count == 0)
                     return new ItemIDResult($"Could not find item with name \"{itemName}\"");
-                return new ItemIDResult(response.Results.First().ID);
+                return new ItemIDResult(response.Results.First().RowID);
             }
             catch (HttpRequestException ex)
             {

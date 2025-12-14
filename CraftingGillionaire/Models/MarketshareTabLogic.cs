@@ -68,16 +68,24 @@ namespace CraftingGillionaire.Models
             ObservableCollection<MarketshareInfo> marketshareInfoList = await this.GetMarketshareInfo();
             this.MarketshareInfos.Clear();
             this.MarketshareInfos.AddRange(marketshareInfoList);
-
-            if (!this.HasSaddlebagException && !this.HasGarlandToolsException)
+            try
             {
-                if (this.SearchRequestData.RowsSelectedFilterItem != null)
-                    this.FilterMarketshareInfo(this.SearchRequestData.RowsSelectedFilterItem.ID);
+                if (!this.HasSaddlebagException && !this.HasGarlandToolsException)
+                {
+                    if (this.SearchRequestData.RowsSelectedFilterItem != null)
+                        this.FilterMarketshareInfo(this.SearchRequestData.RowsSelectedFilterItem.ID);
 
-                this.IsSearchDataGridVisible = true;
-                this.RaisePropertyChanged(nameof(this.IsSearchDataGridVisible));
+                    this.IsSearchDataGridVisible = true;
+                    this.RaisePropertyChanged(nameof(this.IsSearchDataGridVisible));
+                }
             }
-
+            catch (Exception ex)
+            {
+                this.SaddlebagException = "Error when working with Saddlebag data.";
+                this.RaisePropertyChanged(nameof(this.SaddlebagException));
+                this.HasSaddlebagException = true;
+                this.RaisePropertyChanged(nameof(this.HasSaddlebagException));
+            }
             this.IsLoadingSearchResultPanelVisible = false;
             this.RaisePropertyChanged(nameof(this.IsLoadingSearchResultPanelVisible));
         }
@@ -231,14 +239,13 @@ namespace CraftingGillionaire.Models
         {
             if (node == null)
                 throw new ArgumentException(nameof(node));
-            if(node.ItemInfo == null)
-                throw new ArgumentNullException(nameof(node.ItemInfo));
-            if (node.JobInfo == null)
-                throw new ArgumentNullException(nameof(node.JobInfo));
 
+            if (node.ItemInfo == null)
+                throw new ArgumentNullException(nameof(node.ItemInfo));
             if (!node.ItemInfo.IsCraftable)
                 return true;
-
+            if (node.JobInfo == null)
+                throw new ArgumentNullException(nameof(node.JobInfo));
             if (!node.JobInfo.UserCanCraft)
                 return false;
 

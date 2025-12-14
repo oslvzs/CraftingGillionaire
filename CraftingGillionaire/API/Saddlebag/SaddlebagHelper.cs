@@ -52,14 +52,16 @@ namespace CraftingGillionaire.API.Saddlebag
         {
             HttpClient httpClient = new HttpClient()
             {
-                Timeout = TimeSpan.FromSeconds(180)
+                Timeout = TimeSpan.FromSeconds(180),
+                BaseAddress = new Uri("https://docs.saddlebagexchange.com")
             };
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             string requestString = JsonSerializer.Serialize(request, JsonSerializerOptions.Default);
-            StringContent content = new StringContent(requestString, Encoding.UTF8, "application/json");
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/ffxivmarketshare");
+            requestMessage.Content = new StringContent(requestString, Encoding.UTF8, "application/json");
             try
             {
-                HttpResponseMessage responseObject = await httpClient.PostAsync("http://api.saddlebagexchange.com/api/ffxivmarketshare/", content);
+                HttpResponseMessage responseObject = await httpClient.SendAsync(requestMessage);
                 responseObject.EnsureSuccessStatusCode();
                 string responseBody = await responseObject.Content.ReadAsStringAsync();
                 MarketshareResponse response = JsonSerializer.Deserialize<MarketshareResponse>(responseBody) ?? new MarketshareResponse();
